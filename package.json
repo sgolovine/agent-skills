@@ -2,25 +2,21 @@
   "name": "agent-skills",
   "version": "1.0.0",
   "description": "A collection of my agent skills.",
-  "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=20.12"
+  },
   "scripts": {
-    "install:skills": "node scripts/install-agent-skills.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "install:skills": "tsx scripts/install-agent-skills.ts",
+    "tsc": "tsc --noEmit"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sgolovine/agent-skills.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/sgolovine/agent-skills/issues"
-  },
-  "homepage": "https://github.com/sgolovine/agent-skills#readme",
+  "author": "Sunny Golovine",
+  "license": "MIT",
   "dependencies": {
-    "@clack/prompts": "^1.4.0",
+    "@clack/prompts": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.41",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3"
   }

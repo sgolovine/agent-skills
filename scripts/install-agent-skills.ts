@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S tsx
 
 import {
   cancel,
@@ -20,8 +20,26 @@ import { fileURLToPath } from "node:url";
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
 const skillsRoot = path.join(repoRoot, "skills");
+const helpFlags = new Set(["-h", "--help"]);
 
-function handleCancel(value) {
+type Skill = {
+  dirName: string;
+  name: string;
+  sourcePath: string;
+};
+
+type InstallStatus = "conflict" | "installed" | "missing";
+
+type InstallState = {
+  status: InstallStatus;
+  targetPath: string;
+};
+
+function isNodeError(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error;
+}
+
+function handleCancel<T>(value: T | symbol): T {
   if (isCancel(value)) {
     cancel("Installation cancelled.");
     process.exit(0);
@@ -30,7 +48,7 @@ function handleCancel(value) {
   return value;
 }
 
-function expandHome(inputPath) {
+function expandHome(inputPath: string): string {
   if (inputPath === "~") {
     return os.homedir();
   }
@@ -42,7 +60,7 @@ function expandHome(inputPath) {
   return inputPath;
 }
 
-async function exists(targetPath) {
+async function exists(targetPath: string): Promise<boolean> {
   try {
     await fs.access(targetPath, constants.F_OK);
     return true;
@@ -51,16 +69,16 @@ async function exists(targetPath) {
   }
 }
 
-async function readSkillName(skillDir) {
+async function readSkillName(skillDir: string): Promise<string> {
   const skillPath = path.join(skillsRoot, skillDir, "SKILL.md");
   const content = await fs.readFile(skillPath, "utf8");
   const nameMatch = content.match(/^name:\s*(.+)$/m);
   return nameMatch?.[1]?.trim() || skillDir;
 }
 
-async function discoverSkills() {
+async function discoverSkills(): Promise<Skill[]> {
   const entries = await fs.readdir(skillsRoot, { withFileTypes: true });
-  const skillDirs = [];
+  const skillDirs: string[] = [];
 
   for (const entry of entries) {
     if (!entry.isDirectory()) {
@@ -84,7 +102,7 @@ async function discoverSkills() {
   return skills;
 }
 
-async function getInstallState(targetDir, skill) {
+async function getInstallState(targetDir: string, skill: Skill): Promise<InstallState> {
   const targetPath = path.join(targetDir, skill.dirName);
 
   try {
@@ -94,8 +112,8 @@ async function getInstallState(targetDir, skill) {
       return { status: "conflict", targetPath };
     }
 
-    let realTarget;
-    let realSource;
+    let realTarget: string;
+    let realSource: string;
 
     try {
       [realTarget, realSource] = await Promise.all([
@@ -111,7 +129,7 @@ async function getInstallState(targetDir, skill) {
       targetPath,
     };
   } catch (error) {
-    if (error.code === "ENOENT") {
+    if (isNodeError(error) && error.code === "ENOENT") {
       return { status: "missing", targetPath };
     }
 
@@ -119,7 +137,7 @@ async function getInstallState(targetDir, skill) {
   }
 }
 
-function labelForSkill(skill, state) {
+function labelForSkill(skill: Skill, state: InstallState): string {
   if (state.status === "installed") {
     return `${skill.name} (installed)`;
   }
@@ -131,7 +149,10 @@ function labelForSkill(skill, state) {
   return skill.name;
 }
 
-async function installSkill(skill, state) {
+async function installSkill(
+  skill: Skill,
+  state: InstallState,
+): Promise<{ name: string; status: string }> {
   if (state.status === "installed") {
     return { name: skill.name, status: "already installed" };
   }
@@ -144,6 +165,34 @@ async function installSkill(skill, state) {
   return { name: skill.name, status: "installed" };
 }
 
+function getKnownInstallState(
+  installStates: Map<string, InstallState>,
+  skill: Skill,
+): InstallState {
+  const state = installStates.get(skill.dirName);
+
+  if (!state) {
+    throw new Error(`Missing install state for ${skill.dirName}`);
+  }
+
+  return state;
+}
+
+function printHelp(): void {
+  console.log(`Install agent skills.
+
+Usage:
+  npm run install:skills
+
+Options:
+  -h, --help  Show this help message.`);
+}
+
+if (process.argv.slice(2).some((arg) => helpFlags.has(arg))) {
+  printHelp();
+  process.exit(0);
+}
+
 intro("Install agent skills");
 
 const skills = await discoverSkills();
@@ -154,7 +203,7 @@ if (skills.length === 0) {
 }
 
 const installScope = handleCancel(
-  await select({
+  await select<"global" | "project">({
     message: "Where do you want to install skills?",
     options: [
       {
@@ -179,9 +228,11 @@ if (installScope === "project") {
       message: "Project folder path",
       placeholder: process.cwd(),
       validate(value) {
-        if (!value.trim()) {
+        if (!value?.trim()) {
           return "Enter a project folder path.";
         }
+
+        return undefined;
       },
     }),
   );
@@ -189,23 +240,30 @@ if (installScope === "project") {
   targetDir = path.join(path.resolve(expandHome(projectPath)), ".codex", "skills");
 }
 
-const installStates = new Map();
+const installStates = new Map<string, InstallState>();
 
 for (const skill of skills) {
   installStates.set(skill.dirName, await getInstallState(targetDir, skill));
 }
 
 const selectedSkills = handleCancel(
-  await multiselect({
+  await multiselect<string>({
     message: `Select skills to install into ${targetDir}`,
     options: skills.map((skill) => {
-      const state = installStates.get(skill.dirName);
-
-      return {
+      const state = getKnownInstallState(installStates, skill);
+      const option = {
         value: skill.dirName,
         label: labelForSkill(skill, state),
-        hint: state.status === "conflict" ? "will be skipped" : undefined,
       };
+
+      if (state.status === "conflict") {
+        return {
+          ...option,
+          hint: "will be skipped",
+        };
+      }
+
+      return option;
     }),
     required: true,
   }),
@@ -220,7 +278,7 @@ await fs.mkdir(targetDir, { recursive: true });
 const results = [];
 
 for (const skill of selected) {
-  const state = installStates.get(skill.dirName);
+  const state = getKnownInstallState(installStates, skill);
   results.push(await installSkill(skill, state));
 }
 

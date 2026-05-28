@@ -9,10 +9,16 @@ A collection of my agent skills.
 
 ## Install Skills
 
-Run the installer:
+Run the TypeScript installer:
 
 ```sh
 npm run install:skills
 ```
 
 The installer uses `@clack/prompts` to choose a global Codex skills folder or a project folder, then installs selected skills as symlinks.
+
+Run the TypeScript check with:
+
+```sh
+npm test
+```

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reduce Overprompting"
+  short_description: "Audit and rewrite skills for lower cognitive load"
+  default_prompt: "Use $reduce-overprompting to audit this skill for overprompting and rewrite it with better signal."

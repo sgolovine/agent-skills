@@ -4,6 +4,7 @@
   "description": "A collection of my agent skills.",
   "main": "index.js",
   "scripts": {
+    "install:skills": "node scripts/install-agent-skills.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

@@ -8,7 +8,7 @@ Skill folders should be installable by `scripts/install-agent-skills.ts`, which 
 
 ## Skill Format
 
-Codex CLI is the only supported harness format for new work. Do not add new harness-specific manifests or adapters for other agents unless the user explicitly asks to migrate legacy content.
+When a user asks to create a skill, assume they want a Codex CLI skill unless they specify another target. Codex CLI is the only supported harness format for new work. Do not add new harness-specific manifests or adapters for other agents unless the user explicitly asks to migrate legacy content.
 
 Every skill must include `SKILL.md` with YAML frontmatter:
 

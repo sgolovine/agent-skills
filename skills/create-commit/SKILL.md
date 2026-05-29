@@ -7,12 +7,12 @@ description: Create intentional Git commits from local changes using the Convent
 
 ## Operating Principle
 
-Create the smallest coherent commit the work supports. Inspect the diff, protect unrelated user changes, write a Conventional Commit message that reflects behavior, and verify the message before running `git commit`.
+Commit the complete current repository change set. Inspect the diff, decide whether the changes belong in one commit or several targeted commits, write Conventional Commit messages that reflect behavior, and verify each message before running `git commit`.
 
 ## Workflow
 
 1. Inspect repository state with `git status --short` and review changed files with `git diff` plus `git diff --staged` when applicable.
-2. Identify the commit unit. If local changes contain unrelated work, commit only the files or hunks that belong to the requested change and leave the rest untouched. Ask before splitting or staging ambiguous changes.
+2. Plan commits that cover every tracked, staged, unstaged, and untracked change in the repository. The agent's concern is how many targeted commits to create and the commit message for each one; do not leave local changes uncommitted because they seem unrelated.
 3. Choose a Conventional Commit header:
    - Use `feat` for a new user-facing capability.
    - Use `fix` for a bug fix.
@@ -31,13 +31,13 @@ Create the smallest coherent commit the work supports. Inspect the diff, protect
 
 5. Use an imperative, concise description in the header. Keep body text for why the change was needed, non-obvious implementation context, migration notes, or test coverage.
 6. Validate the drafted message with `python3 <skill-dir>/scripts/validate_conventional_commit.py --message-file <file>` or `--message "<message>"`.
-7. Stage deliberately with `git add <paths>` or `git add -p`; do not stage unrelated changes. Re-check `git diff --staged`.
+7. Stage deliberately with `git add <paths>` or `git add -p` so every local change is included in exactly one planned commit. Re-check `git diff --staged`.
 8. Commit with a message file: `git commit -F <message-file>`.
-9. Report the commit hash, final subject, staged files included, and any local changes left uncommitted.
+9. Report each commit hash, final subject, and files included.
 
 ## Message Guidance
 
-- Prefer one commit when all changes serve one purpose; split commits when types, scopes, or user-facing purposes differ.
+- Prefer one commit when all changes serve one purpose; split commits when types, scopes, or user-facing purposes differ. The split should partition the complete local change set rather than exclude files.
 - Put issue references and metadata in footers, for example `Refs: #123` or `Reviewed-by: Name`.
 - Use `BREAKING CHANGE: <description>` exactly uppercase when the breaking change is in a footer. `BREAKING-CHANGE:` is also valid by spec, but prefer `BREAKING CHANGE:` for readability.
 - If reverting, `revert:` is acceptable; include the reverted commit SHA or issue reference in the body or footer.

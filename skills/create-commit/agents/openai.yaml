@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Commit"
+  short_description: "Make focused Conventional Commit commits"
+  default_prompt: "Use $create-commit to inspect my changes and create a Conventional Commit."

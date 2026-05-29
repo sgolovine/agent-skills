@@ -12,9 +12,10 @@ A collection of reusable Codex CLI skills.
 
 | Skill | Description |
 | --- | --- |
-| `conversation-to-skill` | Create a Codex CLI skill from an existing conversation or thread. Use when the user asks to turn a completed discussion, workflow, debugging session, prompt, procedure, or discovered domain knowledge into an installable skill, especially when the result must be created through subagent drafting, validation, and overprompting reduction. |
-| `create-commit` | Create intentional Git commits from local changes using the Conventional Commits 1.0.0 format. Use when the user asks Codex to commit work, make a git commit, stage changes, prepare a commit message, split local changes into commits, or ensure commit messages follow Conventional Commits. |
-| `reduce-overprompting` | Evaluate and rewrite Codex skills for cognitive load, signal-to-noise ratio, and overprompting. Use when reviewing a SKILL.md file, skill folder, prompt pack, agent instruction set, or bundled workflow to decide whether it preserves useful degrees of freedom, overloads the agent with incidental constraints, or needs a tighter rewrite. |
+| [`bqe-timesheet`](skills/bqe-timesheet/SKILL.md) | Fill, verify, save, and submit BQE Core weekly timesheets using the user's authenticated Chrome session. Use when the user asks for help with BQE Core, BQE time cards, weekly timecards, or gives project/task/hour instructions for BQE. |
+| [`conversation-to-skill`](skills/conversation-to-skill/SKILL.md) | Create a Codex CLI skill from an existing conversation or thread. Use when the user asks to turn a completed discussion, workflow, debugging session, prompt, procedure, or discovered domain knowledge into an installable skill, especially when the result must be created through subagent drafting, validation, and overprompting reduction. |
+| [`create-commit`](skills/create-commit/SKILL.md) | Create intentional Git commits from local changes using the Conventional Commits 1.0.0 format. Use when the user asks Codex to commit work, make a git commit, stage changes, prepare a commit message, split local changes into commits, or ensure commit messages follow Conventional Commits. |
+| [`reduce-overprompting`](skills/reduce-overprompting/SKILL.md) | Evaluate and rewrite Codex skills for cognitive load, signal-to-noise ratio, and overprompting. Use when reviewing a SKILL.md file, skill folder, prompt pack, agent instruction set, or bundled workflow to decide whether it preserves useful degrees of freedom, overloads the agent with incidental constraints, or needs a tighter rewrite. |
 
 ## Layout
 

@@ -34,7 +34,7 @@ Prefer this structure:
 
 Move long examples, schemas, variant-specific instructions, and rarely used background out of `SKILL.md` so agents load them only when needed.
 
-When creating a new skill, update `README.md` and add the skill to the available skills table.
+When creating a new skill, update `README.md` and add the skill to the available skills table. The skill column must link to `skills/<skill-name>/SKILL.md`.
 
 ## Repository Workflows
 
@@ -50,6 +50,6 @@ For skill changes, verify:
 - The skill is under `skills/<skill-name>/`.
 - `SKILL.md` has valid frontmatter with `name` and `description`.
 - The skill targets Codex CLI behavior only.
-- New skills are listed in the `README.md` table of skills.
+- New skills are listed in the `README.md` table of skills, with the skill name linked to `skills/<skill-name>/SKILL.md`.
 - Large or conditional material is behind progressive disclosure.
 - Any changed scripts or TypeScript pass the relevant local check.

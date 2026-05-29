@@ -1,0 +1,4 @@
+interface:
+  display_name: "Conversation to Skill"
+  short_description: "Turn chats into validated Codex CLI skills"
+  default_prompt: "Use $conversation-to-skill to create a Codex CLI skill from this conversation."

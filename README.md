@@ -12,6 +12,7 @@ A collection of reusable Codex CLI skills.
 
 | Skill | Description |
 | --- | --- |
+| [`ask-me-questions`](skills/ask-me-questions/SKILL.md) | Ask targeted clarification questions before acting on a provided request. Use when the user invokes this skill with instructions and wants uncertainties, missing details, ambiguities, or conflicts surfaced whenever they cannot be resolved with at least 90% confidence. |
 | [`bqe-timesheet`](skills/bqe-timesheet/SKILL.md) | Fill, verify, save, and submit BQE Core weekly timesheets using the user's authenticated Chrome session. Use when the user asks for help with BQE Core, BQE time cards, weekly timecards, or gives project/task/hour instructions for BQE. |
 | [`conversation-to-skill`](skills/conversation-to-skill/SKILL.md) | Create a Codex CLI skill from an existing conversation or thread. Use when the user asks to turn a completed discussion, workflow, debugging session, prompt, procedure, or discovered domain knowledge into an installable skill, especially when the result must be created through subagent drafting, validation, and overprompting reduction. |
 | [`create-commit`](skills/create-commit/SKILL.md) | Create intentional Git commits from local changes using the Conventional Commits 1.0.0 format. Use when the user asks Codex to commit work, make a git commit, stage changes, prepare a commit message, split local changes into commits, or ensure commit messages follow Conventional Commits. |

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Flight Deal Research"
+  short_description: "Find cheaper flight options by browser research."
+  default_prompt: "Use $flight-deal-research to compare round-trip flight deals from [origin airport] to [destination airport] on [dates]."

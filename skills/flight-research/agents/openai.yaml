@@ -1,0 +1,4 @@
+interface:
+  display_name: "Flight Research"
+  short_description: "Research round-trip flights with Google Flights, SQLite output, and carrier-site validation."
+  default_prompt: "Use $flight-research to compare round-trip flights from [origin IATA] to [destination IATA] for [passenger count] passengers departing [departure date] and returning [return date]."

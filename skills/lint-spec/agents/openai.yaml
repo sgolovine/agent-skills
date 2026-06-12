@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lint Spec"
+  short_description: "Clarify and update spec files"
+  default_prompt: "Lint this spec file, identify low-confidence or ambiguous areas, ask clarifying questions with recommended solutions, and update the file after each response."

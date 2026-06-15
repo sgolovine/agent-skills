@@ -19,6 +19,7 @@ A collection of reusable Codex CLI skills.
 | [`flight-research`](skills/flight-research/SKILL.md) | Run two-pass flight research with supervisor-managed subagents across flight search engines, non-ATPCO carrier sites, and direct carrier validation, aligned to user constraints and written to SQLite output. Use only when origin IATA code, destination IATA code, passenger count, departure date, and return date are provided; date mode may be relative or exact and defaults to relative. |
 | [`lint-spec`](skills/lint-spec/SKILL.md) | Scrutinize specification files for low-confidence, ambiguous, unclear, missing, or implicit requirements. Use when the user asks to lint, clarify, harden, or iterate on a spec and wants questions with confidence scores, proposed solutions, recommended choices, and disk updates after each clarification. |
 | [`reduce-overprompting`](skills/reduce-overprompting/SKILL.md) | Evaluate and rewrite Codex skills for cognitive load, signal-to-noise ratio, and overprompting. Use when reviewing a SKILL.md file, skill folder, prompt pack, agent instruction set, or bundled workflow to decide whether it preserves useful degrees of freedom, overloads the agent with incidental constraints, or needs a tighter rewrite. |
+| [`spec-to-plan`](skills/spec-to-plan/SKILL.md) | Convert a specification file into a step-by-step implementation plan for agents. Use when the user asks to create a plan, implementation plan, execution plan, or agent-ready plan from a spec path, with an optional custom output path. |
 
 ## Layout
 

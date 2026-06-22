@@ -11,7 +11,7 @@
     "tsc": "tsc --noEmit"
   },
   "author": "Sunny Golovine",
-  "license": "MIT",
+  "license": "Unlicense",
   "dependencies": {
     "@clack/prompts": "^1.4.0"
   },

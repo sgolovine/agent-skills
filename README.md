@@ -1,12 +1,14 @@
 # Agent Skills
 
-Install the skills in this repo with:
+A collection of my personal agent skills. Feel free to take these skills, use them, modify them and redistribute them as you wish.
+
+## Installation
+
+Install the skills in this repo with. This will create a symlink between the location of the agent skill in the repo and `~/.codex/skills/<SKILL>`:
 
 ```sh
 npm run install:skills
 ```
-
-A collection of reusable Codex CLI skills.
 
 ## Available Skills
 
@@ -35,3 +37,11 @@ Run the TypeScript check with:
 ```sh
 npm test
 ```
+
+## Contributing
+
+This is as personal software and as such I am not accepting contributions at this time. 
+
+## License
+
+Public domain under [The Unlicense](LICENSE.md).

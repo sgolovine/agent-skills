@@ -1,0 +1,4 @@
+interface:
+  display_name: "AppImage Desktop Install"
+  short_description: "Install AppImages as desktop apps"
+  default_prompt: "Use $appimage-desktop-install to install this AppImage as a normal Linux desktop application."

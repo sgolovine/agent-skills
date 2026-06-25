@@ -1,6 +1,6 @@
 ---
 name: skill-lint
-description: Lint Codex CLI skills with selectable actions and report or fix modes. Use when asked to review, lint, evaluate, harden, reduce overprompting, security-review, or fix issues in another skill.
+description: Lint Codex CLI skills with selectable actions and report or fix modes. Use when asked to review, lint, evaluate, harden, find no-op instructions, reduce overprompting, security-review, or fix issues in another skill.
 ---
 
 # Skill Lint
@@ -20,6 +20,7 @@ Actions are discrete checks with their own rubric and fix guidance:
 
 | Action | Load When |
 | --- | --- |
+| `no-op-check` | The user asks about no-op instructions, behavior-neutral text, generic advice, instruction bloat, useless skill lines, or all issues. |
 | `reduce-overprompting` | The user asks about cognitive load, overprompting, prompt weight, skill size, clarity, progressive disclosure, or all issues. |
 | `security-review` | The user asks about security, trust, malicious behavior, prompt injection, secrets, exfiltration, supply chain risk, or all issues. |
 
@@ -35,6 +36,7 @@ When the user does not name an action, run all actions. When adding future actio
    - no mode defaults to `report`.
 3. Determine actions from the request. If the user says "all issues" or gives no specific action, run every action.
 4. Load only the reference files for selected actions:
+   - `no-op-check`: `references/actions/no-op-check.md`
    - `reduce-overprompting`: `references/actions/reduce-overprompting.md`
    - `security-review`: `references/actions/security-review.md`
 5. In `report` mode, inspect the target and return the combined report without editing.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Skill Security Review"
+  short_description: "Review untrusted agent skills for abuse"
+  default_prompt: "Use $agent-skill-security-review to review the skill at /path/to/skill before I install or use it."

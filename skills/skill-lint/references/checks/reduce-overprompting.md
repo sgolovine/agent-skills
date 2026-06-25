@@ -1,4 +1,4 @@
-# Reduce Overprompting Action
+# Reduce Overprompting Check
 
 ## Purpose
 
@@ -75,7 +75,7 @@ Each question must include the best attempted answer and plausible responses.
 
 ## Output Details
 
-For action-local report findings, include:
+For check-local report findings, include:
 
 ```markdown
 - [reduce-overprompting][severity] Finding title

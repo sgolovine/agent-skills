@@ -1,4 +1,4 @@
-# No-Op Check Action
+# No-Op Check
 
 ## Purpose
 
@@ -72,7 +72,7 @@ Each question must include the best attempted answer and plausible responses.
 
 ## Output Details
 
-For action-local report findings, include:
+For check-local report findings, include:
 
 ```markdown
 - [no-op-check][severity] Finding title

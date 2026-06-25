@@ -1,4 +1,4 @@
-# Security Review Action
+# Security Review Check
 
 ## Purpose
 
@@ -188,7 +188,7 @@ Ask before fixing when below `90%` confidence about whether a capability is legi
 
 ## Output Details
 
-For action-local reports, use:
+For check-local reports, use:
 
 ```json
 {

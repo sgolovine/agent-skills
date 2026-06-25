@@ -23,6 +23,7 @@ import urllib.parse
 import warnings
 from dataclasses import dataclass
 from pathlib import Path
+from tempfile import gettempdir
 from typing import Iterable
 
 MAX_FULL_SCAN_BYTES = 2_000_000
@@ -488,7 +489,7 @@ def scan(target: Path) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Static signal scanner for untrusted agent skills.")
     parser.add_argument("target", help="Skill directory, repository, or single file to scan")
-    parser.add_argument("--json", dest="json_path", help="Write JSON report to this path")
+    parser.add_argument("--json", dest="json_path", help="Write JSON report to a new file under the system temp directory")
     args = parser.parse_args()
 
     target = Path(args.target)
@@ -499,7 +500,16 @@ def main() -> int:
     report = scan(target)
     output = json.dumps(report, indent=2, sort_keys=True)
     if args.json_path:
-        Path(args.json_path).write_text(output + "\n")
+        json_path = Path(args.json_path).expanduser().resolve()
+        temp_root = Path(gettempdir()).resolve()
+        if not json_path.is_relative_to(temp_root):
+            print(f"--json path must be under {temp_root}", file=sys.stderr)
+            return 2
+        if json_path.exists():
+            print(f"Refusing to overwrite existing report: {json_path}", file=sys.stderr)
+            return 2
+        json_path.parent.mkdir(parents=True, exist_ok=True)
+        json_path.write_text(output + "\n")
     else:
         print(output)
     return 0

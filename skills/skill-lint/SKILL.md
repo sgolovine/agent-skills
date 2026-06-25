@@ -35,8 +35,8 @@ When the user does not name an action, run all actions. When adding future actio
    - no mode defaults to `report`.
 3. Determine actions from the request. If the user says "all issues" or gives no specific action, run every action.
 4. Load only the reference files for selected actions:
-   - `references/actions/reduce-overprompting.md`
-   - `references/actions/security-review.md`
+   - `reduce-overprompting`: `references/actions/reduce-overprompting.md`
+   - `security-review`: `references/actions/security-review.md`
 5. In `report` mode, inspect the target and return the combined report without editing.
 6. In `fix` mode:
    - If the user supplied a concrete issue list, fix from that list.

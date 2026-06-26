@@ -15,6 +15,7 @@ import datetime as dt
 import gzip
 import hashlib
 import html
+import io
 import json
 import re
 import sys
@@ -150,16 +151,51 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def sha256_text(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
 def collect_files(root: Path) -> list[FileRecord]:
+    root = root.resolve()
     paths: Iterable[Path] = [root] if root.is_file() else root.rglob("*")
     records = []
     for path in paths:
+        relpath = path.name if root.is_file() else str(path.relative_to(root))
+        if path.is_symlink():
+            try:
+                target = path.resolve(strict=True)
+            except OSError:
+                records.append(
+                    FileRecord(
+                        path=path,
+                        relpath=relpath,
+                        size=0,
+                        sha256=sha256_text("broken symlink"),
+                        extension=path.suffix,
+                        text_like=False,
+                        skipped_reason="broken_symlink",
+                    )
+                )
+                continue
+            if not target.is_relative_to(root):
+                link_target = str(path.readlink())
+                records.append(
+                    FileRecord(
+                        path=path,
+                        relpath=relpath,
+                        size=len(link_target.encode("utf-8")),
+                        sha256=sha256_text(f"symlink:{link_target}"),
+                        extension=path.suffix,
+                        text_like=False,
+                        skipped_reason="symlink_outside_target",
+                    )
+                )
+                continue
         if not path.is_file():
             continue
         resolved = path.resolve()
         if ".git/objects/" in resolved.as_posix():
             continue
-        relpath = resolved.name if root.is_file() else str(resolved.relative_to(root.resolve()))
         size = resolved.stat().st_size
         text_like = resolved.suffix in TEXT_SUFFIXES or resolved.name in TEXT_NAMES or resolved.name.startswith("README")
         skipped_reason = "large_file_sampled" if size > MAX_FULL_SCAN_BYTES else None
@@ -269,16 +305,28 @@ def decoded_bytes_to_views(parent: TextView, raw: bytes, name: str) -> list[Text
         return []
     views = []
     if raw.startswith(b"\x1f\x8b"):
-        try:
-            raw = gzip.decompress(raw)
-            name = f"{name}_gzip"
-        except Exception:
+        raw = decompress_gzip_limited(raw, MAX_DECODED_BYTES)
+        if raw is None:
             return []
+        name = f"{name}_gzip"
+    if len(raw) > MAX_DECODED_BYTES:
+        return []
     if printable_ratio(raw) < 0.65:
         return []
     text = raw[:MAX_DECODED_BYTES].decode("utf-8", errors="replace")
     views.append(TextView(parent.file, name, text, f"{name} from {parent.name}", parent.depth + 1))
     return views
+
+
+def decompress_gzip_limited(raw: bytes, limit: int) -> bytes | None:
+    try:
+        with gzip.GzipFile(fileobj=io.BytesIO(raw)) as handle:
+            data = handle.read(limit + 1)
+    except Exception:
+        return None
+    if len(data) > limit:
+        return None
+    return data
 
 
 def line_number(text: str, start: int) -> int:
@@ -319,7 +367,7 @@ def scan_patterns(view: TextView, finding_start: int) -> list[dict]:
 def special_findings(record: FileRecord, finding_start: int) -> list[dict]:
     findings = []
     next_id = finding_start
-    if record.skipped_reason:
+    if record.skipped_reason == "large_file_sampled":
         findings.append(
             {
                 "id": f"F{next_id:03d}",
@@ -334,6 +382,46 @@ def special_findings(record: FileRecord, finding_start: int) -> list[dict]:
                 "evidence": f"{record.size} bytes",
                 "why_it_matters": "Large files can hide payloads or create review cost.",
                 "recommended_action": "Inspect the full file manually if it is relevant.",
+            }
+        )
+        next_id += 1
+    elif record.skipped_reason == "symlink_outside_target":
+        try:
+            evidence = f"symlink target: {record.path.readlink()}"
+        except OSError:
+            evidence = "symlink target could not be read"
+        findings.append(
+            {
+                "id": f"F{next_id:03d}",
+                "title": "Out-of-target symlink skipped",
+                "severity": "medium",
+                "category": "sandbox_escape",
+                "intent_risk": 1,
+                "capability_risk": 2,
+                "file": record.relpath,
+                "line": None,
+                "view": "inventory",
+                "evidence": evidence,
+                "why_it_matters": "Symlinks can pull host files or files outside the requested review target into the scan.",
+                "recommended_action": "Review the symlink target separately only when the user explicitly approves that expanded scope.",
+            }
+        )
+        next_id += 1
+    elif record.skipped_reason == "broken_symlink":
+        findings.append(
+            {
+                "id": f"F{next_id:03d}",
+                "title": "Broken symlink skipped",
+                "severity": "low",
+                "category": "sandbox_escape",
+                "intent_risk": 1,
+                "capability_risk": 0,
+                "file": record.relpath,
+                "line": None,
+                "view": "inventory",
+                "evidence": "symlink target could not be resolved",
+                "why_it_matters": "Broken symlinks can hide missing review material or confuse inventory.",
+                "recommended_action": "Confirm whether the symlink is expected or remove it from the reviewed skill.",
             }
         )
         next_id += 1

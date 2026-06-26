@@ -72,14 +72,20 @@ Each question must include the best attempted answer and plausible responses.
 
 ## Output Details
 
-For check-local report findings, include:
+For check-local report findings, add structured finding objects to the combined HTML report data:
 
-```markdown
-- [no-op-check][severity] Finding title
-  - File: path
-  - Evidence: concise snippet or behavior-neutral section
-  - Removal test: why deleting it would not change target skill behavior
-  - Recommended fix: concrete delete, merge, or rewrite
+```json
+{
+  "section": "No Ops",
+  "check": "no-op-check",
+  "severity": "low | medium | high",
+  "title": "Finding title",
+  "file": "path",
+  "line": 1,
+  "evidence": "Concise snippet or behavior-neutral section",
+  "impact": "Removal test: why deleting it would not change target skill behavior",
+  "recommended_fix": "Concrete delete, merge, or rewrite"
+}
 ```
 
 ## Validation

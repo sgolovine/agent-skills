@@ -75,15 +75,21 @@ Each question must include the best attempted answer and plausible responses.
 
 ## Output Details
 
-For check-local report findings, include:
+For check-local report findings, add structured finding objects to the combined HTML report data:
 
-```markdown
-- [reduce-overprompting][severity] Finding title
-  - Score: category N/3
-  - File: path
-  - Evidence: concise snippet or behavior
-  - Why it matters: cognitive or operational impact
-  - Recommended fix: concrete edit
+```json
+{
+  "section": "Overprompting",
+  "check": "reduce-overprompting",
+  "severity": "low | medium | high",
+  "title": "Finding title",
+  "score": "category N/3",
+  "file": "path",
+  "line": 1,
+  "evidence": "Concise snippet or behavior",
+  "impact": "Cognitive or operational impact",
+  "recommended_fix": "Concrete edit"
+}
 ```
 
 Use severity mapping: `low` for score `1`, `medium` for score `2`, `high` for score `3`.

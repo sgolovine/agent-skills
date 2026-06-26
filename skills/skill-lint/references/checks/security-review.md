@@ -188,35 +188,24 @@ Ask before fixing when below `90%` confidence about whether a capability is legi
 
 ## Output Details
 
-For check-local reports, use:
+For check-local report findings, add structured finding objects to the combined HTML report data:
 
 ```json
 {
-  "verdict": "safe | caution | unsafe",
-  "summary": "Short human-readable summary.",
-  "findings": [
-    {
-      "title": "Finding title",
-      "severity": "low | medium | high | critical",
-      "category": "prompt_control | tool_control | code_execution | secret_access | exfiltration | persistence | supply_chain | sandbox_escape | ci_compromise | dos | social_engineering",
-      "file": "path/to/file",
-      "evidence": "Relevant snippet or behavior",
-      "why_it_matters": "Security impact",
-      "recommended_action": "Remove, sandbox, restrict, pin dependency, etc."
-    }
-  ],
-  "capabilities_observed": {
-    "network": false,
-    "shell": false,
-    "file_read": false,
-    "file_write": false,
-    "secret_access": false,
-    "persistence": false,
-    "ci_modification": false
-  },
-  "unknowns": []
+  "section": "Security",
+  "check": "security-review",
+  "severity": "low | medium | high | critical",
+  "title": "Finding title",
+  "category": "category-id",
+  "file": "path/to/file",
+  "line": 1,
+  "evidence": "Relevant snippet or behavior",
+  "impact": "Security impact",
+  "recommended_fix": "Remove, sandbox, restrict, pin dependency, etc."
 }
 ```
+
+Include the verdict, summary, capabilities observed, and unknowns in the report data when they affect interpretation.
 
 Verdicts:
 

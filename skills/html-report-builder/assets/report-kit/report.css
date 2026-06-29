@@ -1,0 +1,509 @@
+:root {
+  --background: 220 25% 97%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --muted: 214 32% 95%;
+  --muted-foreground: 215 16% 47%;
+  --border: 214 32% 91%;
+  --primary: 221 83% 53%;
+  --primary-foreground: 210 40% 98%;
+  --accent: 214 95% 93%;
+  --accent-foreground: 224 76% 35%;
+  --report-bg: hsl(var(--background));
+  --report-surface: hsl(var(--card));
+  --report-border: hsl(var(--border));
+  --report-shadow: 0 18px 45px hsl(222 47% 11% / 0.08);
+  --report-text: hsl(var(--card-foreground));
+  --report-muted: hsl(var(--muted-foreground));
+  --report-subtle: hsl(215 16% 58%);
+  --report-accent: hsl(var(--primary));
+  --report-accent-strong: hsl(var(--accent-foreground));
+  --report-accent-soft: hsl(var(--accent));
+  --report-success: #12805c;
+  --report-warning: #a15c07;
+  --report-danger: #b42318;
+  --report-info: #0f6d91;
+  --report-max-width: 1120px;
+  --report-radius: 8px;
+  --report-gap: 20px;
+  --report-density: 1;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--report-bg);
+}
+
+body {
+  margin: 0;
+  color: var(--report-text);
+  background: var(--report-bg);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.report-shell {
+  width: min(100% - 32px, var(--report-max-width));
+  margin: 0 auto;
+  padding: 32px 0 56px;
+}
+
+.report-cover,
+.component-library > section {
+  background: var(--report-surface);
+  border: 1px solid var(--report-border);
+  border-radius: var(--report-radius);
+  box-shadow: var(--report-shadow);
+  margin: 0 0 var(--report-gap);
+  padding: calc(28px * var(--report-density));
+}
+
+.report-shell:not(.component-library) .report-section {
+  margin: 0 0 calc(var(--report-gap) * 1.4);
+  padding: 6px 0 0;
+}
+
+.report-cover {
+  display: grid;
+  gap: 18px;
+}
+
+.eyebrow,
+.section-kicker,
+.metric-label,
+.table-caption {
+  color: var(--report-accent-strong);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  max-width: 14ch;
+  margin-bottom: 0;
+  font-size: 4.25rem;
+  line-height: 0.98;
+}
+
+h2 {
+  margin-bottom: 8px;
+  font-size: 2.25rem;
+  line-height: 1.08;
+}
+
+h3 {
+  margin-bottom: 6px;
+  font-size: 1.15rem;
+  line-height: 1.25;
+}
+
+.deck {
+  max-width: 760px;
+  color: var(--report-muted);
+  font-size: 1.05rem;
+}
+
+.report-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--report-muted);
+  font-size: 0.92rem;
+}
+
+.meta-item {
+  border: 1px solid var(--report-border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #fbfcff;
+}
+
+.section-header,
+.subsection-header {
+  margin-bottom: 16px;
+}
+
+.section-lede,
+.subsection-lede {
+  max-width: 780px;
+  color: var(--report-muted);
+}
+
+.grid {
+  display: grid;
+  gap: var(--report-gap);
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-3,
+.metric-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metric-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.metric-card,
+.chart-panel,
+.callout,
+.timeline-item,
+.note-card {
+  border: 1px solid var(--report-border);
+  border-radius: var(--report-radius);
+  background: #fbfcff;
+}
+
+.metric-card {
+  padding: 18px;
+}
+
+.metric-value {
+  margin: 6px 0;
+  font-size: 2.55rem;
+  font-weight: 760;
+  line-height: 1;
+}
+
+.metric-caption,
+.chart-caption,
+.note-card,
+.timeline-body {
+  color: var(--report-muted);
+  font-size: 0.92rem;
+}
+
+.metric-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.metric-delta.positive {
+  color: var(--report-success);
+  background: #e8f7f1;
+}
+
+.metric-delta.negative {
+  color: var(--report-danger);
+  background: #fff0ee;
+}
+
+.metric-delta.neutral {
+  color: var(--report-info);
+  background: #e9f7fc;
+}
+
+.callout {
+  border-left: 5px solid var(--report-accent);
+  padding: 18px;
+}
+
+.callout strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--report-border);
+  border-radius: var(--report-radius);
+}
+
+table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  background: var(--report-surface);
+}
+
+caption {
+  caption-side: top;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--report-border);
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  color: var(--report-muted);
+  background: #f7f9fd;
+  font-size: 0.84rem;
+  font-weight: 760;
+}
+
+tr:last-child td,
+tr:last-child th {
+  border-bottom: 0;
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-pill {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+.status-pill.good {
+  color: var(--report-success);
+  background: #e8f7f1;
+}
+
+.status-pill.warn {
+  color: var(--report-warning);
+  background: #fff6e7;
+}
+
+.status-pill.bad {
+  color: var(--report-danger);
+  background: #fff0ee;
+}
+
+.chart-panel {
+  padding: 18px;
+}
+
+.bar-chart {
+  display: grid;
+  gap: 12px;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.8fr) minmax(160px, 2fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.bar-label,
+.bar-value {
+  font-size: 0.92rem;
+}
+
+.bar-value {
+  color: var(--report-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.bar-track {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--report-accent-soft);
+}
+
+.bar-fill {
+  width: var(--value);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--report-accent);
+}
+
+.stacked-bar {
+  display: flex;
+  height: 18px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--report-accent-soft);
+}
+
+.stack-segment {
+  width: var(--value);
+  background: var(--segment-color, var(--report-accent));
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  color: var(--report-muted);
+  font-size: 0.88rem;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: var(--segment-color, var(--report-accent));
+}
+
+.sparkline {
+  width: 100%;
+  height: 74px;
+}
+
+.sparkline polyline {
+  fill: none;
+  stroke: var(--report-accent);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+}
+
+.sparkline-grid {
+  stroke: var(--report-border);
+  stroke-width: 1;
+}
+
+.donut {
+  --percent: 68%;
+  display: grid;
+  width: 132px;
+  height: 132px;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(var(--report-accent) var(--percent), var(--report-accent-soft) 0);
+}
+
+.donut-center {
+  display: grid;
+  width: 86px;
+  height: 86px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--report-surface);
+  color: var(--report-text);
+  font-size: 1.35rem;
+  font-weight: 760;
+}
+
+.timeline {
+  display: grid;
+  gap: 12px;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 14px;
+  padding: 14px;
+}
+
+.timeline-date {
+  color: var(--report-accent-strong);
+  font-weight: 760;
+}
+
+.note-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.note-card {
+  padding: 14px;
+}
+
+@media (max-width: 760px) {
+  .report-shell {
+    width: min(100% - 20px, var(--report-max-width));
+    padding: 18px 0 36px;
+  }
+
+  .report-cover,
+  .component-library > section {
+    padding: 20px;
+  }
+
+  .report-shell:not(.component-library) .report-section {
+    padding-top: 2px;
+  }
+
+  h1 {
+    font-size: 2.65rem;
+  }
+
+  h2 {
+    font-size: 1.65rem;
+  }
+
+  .metric-value {
+    font-size: 2rem;
+  }
+
+  .grid-2,
+  .grid-3,
+  .metric-grid,
+  .note-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bar-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .bar-value {
+    text-align: left;
+  }
+
+  .timeline-item {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  :root {
+    --report-bg: #ffffff;
+    --report-shadow: none;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  .report-shell {
+    width: 100%;
+    padding: 0;
+  }
+
+  .report-cover,
+  .component-library > section,
+  .metric-card,
+  .chart-panel,
+  .callout,
+  .timeline-item,
+  .note-card {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+}

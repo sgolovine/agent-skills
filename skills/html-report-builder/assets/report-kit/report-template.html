@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Report Title</title>
+    <link rel="stylesheet" href="./report.css">
+  </head>
+  <body>
+    <main class="report-shell">
+      <header class="report-cover">
+        <div class="eyebrow">Report</div>
+        <h1>Report Title</h1>
+        <p class="deck">Replace this text with the report purpose, audience, scope, and the most important context.</p>
+        <div class="report-meta" aria-label="Report metadata">
+          <span class="meta-item">Prepared for: Audience</span>
+          <span class="meta-item">Period: Month YYYY</span>
+          <span class="meta-item">Source: Dataset or system</span>
+        </div>
+      </header>
+
+      <section class="report-section" aria-labelledby="summary-title">
+        <div class="section-header">
+          <div class="section-kicker">Summary</div>
+          <h2 id="summary-title">Key Results</h2>
+          <p class="section-lede">Lead with the highest-signal findings before moving into detail.</p>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card">
+            <div class="metric-label">Metric One</div>
+            <div class="metric-value">42%</div>
+            <span class="metric-delta positive">Up 8%</span>
+            <p class="metric-caption">Short qualifier or date range.</p>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">Metric Two</div>
+            <div class="metric-value">$1.2M</div>
+            <span class="metric-delta neutral">Flat</span>
+            <p class="metric-caption">Short qualifier or date range.</p>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">Metric Three</div>
+            <div class="metric-value">19</div>
+            <span class="metric-delta negative">Down 3</span>
+            <p class="metric-caption">Short qualifier or date range.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="report-section" aria-labelledby="evidence-title">
+        <div class="section-header">
+          <div class="section-kicker">Evidence</div>
+          <h2 id="evidence-title">Performance by Segment</h2>
+          <p class="section-lede">Use a chart for scanning and a table for exact values.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <article class="chart-panel" aria-label="Category comparison chart">
+            <h3>Category Comparison</h3>
+            <div class="bar-chart">
+              <div class="bar-row">
+                <span class="bar-label">Segment A</span>
+                <span class="bar-track"><span class="bar-fill" style="--value: 72%;"></span></span>
+                <span class="bar-value">72%</span>
+              </div>
+              <div class="bar-row">
+                <span class="bar-label">Segment B</span>
+                <span class="bar-track"><span class="bar-fill" style="--value: 54%;"></span></span>
+                <span class="bar-value">54%</span>
+              </div>
+              <div class="bar-row">
+                <span class="bar-label">Segment C</span>
+                <span class="bar-track"><span class="bar-fill" style="--value: 38%;"></span></span>
+                <span class="bar-value">38%</span>
+              </div>
+            </div>
+          </article>
+
+          <aside class="callout">
+            <strong>Primary takeaway</strong>
+            Replace with a decision-relevant insight, caveat, or recommendation supported by the chart and table.
+          </aside>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

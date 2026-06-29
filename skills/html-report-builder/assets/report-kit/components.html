@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HTML Report Components</title>
+    <link rel="stylesheet" href="./report.css">
+  </head>
+  <body>
+    <main class="report-shell component-library">
+      <section data-component="report-cover">
+        <div class="eyebrow">Quarterly Report</div>
+        <h1>Customer Health Review</h1>
+        <p class="deck">A concise overview of customer health, retention signals, and the highest-priority actions for the next operating cycle.</p>
+        <div class="report-meta" aria-label="Report metadata">
+          <span class="meta-item">Prepared for: Leadership</span>
+          <span class="meta-item">Period: Q2 FY26</span>
+          <span class="meta-item">Source: CRM and product analytics</span>
+        </div>
+      </section>
+
+      <section class="report-section" data-component="section-header">
+        <div class="section-header">
+          <div class="section-kicker">Findings</div>
+          <h2 id="findings-title">Retention Signals Improved</h2>
+          <p class="section-lede">Use this section header to introduce a major section and summarize what the reader should notice.</p>
+        </div>
+      </section>
+
+      <section class="report-section" data-component="subsection-header">
+        <div class="subsection-header">
+          <h3>Expansion Accounts</h3>
+          <p class="subsection-lede">Use this for a smaller topic inside a section while preserving heading hierarchy.</p>
+        </div>
+      </section>
+
+      <section class="report-section" data-component="metric-summary" aria-labelledby="metric-summary-title">
+        <div class="section-header">
+          <div class="section-kicker">Summary</div>
+          <h2 id="metric-summary-title">Key Metrics</h2>
+        </div>
+        <div class="metric-grid">
+          <article class="metric-card">
+            <div class="metric-label">Net Retention</div>
+            <div class="metric-value">111%</div>
+            <span class="metric-delta positive">Up 6 pts</span>
+            <p class="metric-caption">Quarter over quarter.</p>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">At-Risk Accounts</div>
+            <div class="metric-value">18</div>
+            <span class="metric-delta negative">Up 4</span>
+            <p class="metric-caption">Accounts with open escalation.</p>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">Expansion Pipeline</div>
+            <div class="metric-value">$2.4M</div>
+            <span class="metric-delta neutral">On plan</span>
+            <p class="metric-caption">Weighted pipeline value.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="report-section" data-component="insight-callout">
+        <aside class="callout">
+          <strong>Recommended action</strong>
+          Prioritize onboarding intervention for enterprise accounts that have not activated the second workflow by day 21.
+        </aside>
+      </section>
+
+      <section class="report-section" data-component="comparison-table" aria-labelledby="comparison-table-title">
+        <div class="section-header">
+          <div class="section-kicker">Comparison</div>
+          <h2 id="comparison-table-title">Scenario Comparison</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <caption><span class="table-caption">Options and tradeoffs</span></caption>
+            <thead>
+              <tr>
+                <th scope="col">Scenario</th>
+                <th scope="col">Expected Impact</th>
+                <th scope="col">Cost</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Targeted onboarding</th>
+                <td>Improves activation for high-fit accounts.</td>
+                <td>Medium</td>
+                <td><span class="status-pill good">Recommended</span></td>
+              </tr>
+              <tr>
+                <th scope="row">Broad discounting</th>
+                <td>May reduce near-term churn but weakens margin.</td>
+                <td>High</td>
+                <td><span class="status-pill warn">Needs review</span></td>
+              </tr>
+              <tr>
+                <th scope="row">No change</th>
+                <td>Maintains current risk profile.</td>
+                <td>Low</td>
+                <td><span class="status-pill bad">Not advised</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="report-section" data-component="data-table" aria-labelledby="data-table-title">
+        <div class="section-header">
+          <div class="section-kicker">Data</div>
+          <h2 id="data-table-title">Segment Results</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <caption><span class="table-caption">Exact values by segment</span></caption>
+            <thead>
+              <tr>
+                <th scope="col">Segment</th>
+                <th scope="col" class="num">Accounts</th>
+                <th scope="col" class="num">Retention</th>
+                <th scope="col" class="num">Expansion</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Enterprise</th>
+                <td class="num">84</td>
+                <td class="num">118%</td>
+                <td class="num">$1.6M</td>
+              </tr>
+              <tr>
+                <th scope="row">Mid-market</th>
+                <td class="num">231</td>
+                <td class="num">108%</td>
+                <td class="num">$0.6M</td>
+              </tr>
+              <tr>
+                <th scope="row">SMB</th>
+                <td class="num">619</td>
+                <td class="num">96%</td>
+                <td class="num">$0.2M</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="report-section" data-component="bar-chart" aria-labelledby="bar-chart-title">
+        <div class="section-header">
+          <div class="section-kicker">Chart</div>
+          <h2 id="bar-chart-title">Activation by Segment</h2>
+        </div>
+        <article class="chart-panel" aria-label="Activation rate by segment">
+          <div class="bar-chart">
+            <div class="bar-row">
+              <span class="bar-label">Enterprise</span>
+              <span class="bar-track"><span class="bar-fill" style="--value: 82%;"></span></span>
+              <span class="bar-value">82%</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">Mid-market</span>
+              <span class="bar-track"><span class="bar-fill" style="--value: 68%;"></span></span>
+              <span class="bar-value">68%</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">SMB</span>
+              <span class="bar-track"><span class="bar-fill" style="--value: 51%;"></span></span>
+              <span class="bar-value">51%</span>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="report-section" data-component="stacked-bar" aria-labelledby="stacked-bar-title">
+        <div class="section-header">
+          <div class="section-kicker">Composition</div>
+          <h2 id="stacked-bar-title">Pipeline Mix</h2>
+        </div>
+        <article class="chart-panel" aria-label="Pipeline mix by stage">
+          <div class="stacked-bar">
+            <span class="stack-segment" style="--value: 45%; --segment-color: #2563eb;"></span>
+            <span class="stack-segment" style="--value: 30%; --segment-color: #12805c;"></span>
+            <span class="stack-segment" style="--value: 25%; --segment-color: #a15c07;"></span>
+          </div>
+          <div class="chart-legend">
+            <span><span class="legend-dot" style="--segment-color: #2563eb;"></span>Qualified 45%</span>
+            <span><span class="legend-dot" style="--segment-color: #12805c;"></span>Proposal 30%</span>
+            <span><span class="legend-dot" style="--segment-color: #a15c07;"></span>Commit 25%</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="report-section" data-component="sparkline-panel" aria-labelledby="sparkline-title">
+        <div class="section-header">
+          <div class="section-kicker">Trend</div>
+          <h2 id="sparkline-title">Weekly Active Accounts</h2>
+        </div>
+        <article class="chart-panel">
+          <div class="metric-label">8-week trend</div>
+          <div class="metric-value">7,842</div>
+          <svg class="sparkline" viewBox="0 0 320 90" role="img" aria-label="Weekly active accounts increased over eight weeks">
+            <line class="sparkline-grid" x1="0" y1="72" x2="320" y2="72"></line>
+            <line class="sparkline-grid" x1="0" y1="36" x2="320" y2="36"></line>
+            <polyline points="0,70 45,63 90,66 135,48 180,52 225,34 270,28 320,18"></polyline>
+          </svg>
+          <p class="chart-caption">Activity rose 18% over the period, with the largest gain after the onboarding campaign.</p>
+        </article>
+      </section>
+
+      <section class="report-section" data-component="donut-progress" aria-labelledby="donut-title">
+        <div class="section-header">
+          <div class="section-kicker">Progress</div>
+          <h2 id="donut-title">Migration Completion</h2>
+        </div>
+        <article class="chart-panel grid grid-2" aria-label="Migration completion progress">
+          <div class="donut" style="--percent: 68%;">
+            <div class="donut-center">68%</div>
+          </div>
+          <div>
+            <h3>On Track</h3>
+            <p class="chart-caption">68% of accounts have completed migration. The remaining work is concentrated in two regions.</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="report-section" data-component="timeline" aria-labelledby="timeline-title">
+        <div class="section-header">
+          <div class="section-kicker">Timeline</div>
+          <h2 id="timeline-title">Upcoming Milestones</h2>
+        </div>
+        <div class="timeline">
+          <article class="timeline-item">
+            <div class="timeline-date">Jul 12</div>
+            <div class="timeline-body"><strong>Finalize cohort list.</strong> Lock target accounts and owners.</div>
+          </article>
+          <article class="timeline-item">
+            <div class="timeline-date">Jul 26</div>
+            <div class="timeline-body"><strong>Launch intervention.</strong> Begin onboarding and success outreach.</div>
+          </article>
+          <article class="timeline-item">
+            <div class="timeline-date">Aug 16</div>
+            <div class="timeline-body"><strong>Review impact.</strong> Compare activation and retention movement.</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="report-section" data-component="appendix-notes" aria-labelledby="appendix-title">
+        <div class="section-header">
+          <div class="section-kicker">Appendix</div>
+          <h2 id="appendix-title">Notes and Assumptions</h2>
+        </div>
+        <div class="note-grid">
+          <div class="note-card"><strong>Source</strong><br>CRM export and product analytics snapshot from the stated reporting period.</div>
+          <div class="note-card"><strong>Method</strong><br>Retention values are normalized by starting recurring revenue for the period.</div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

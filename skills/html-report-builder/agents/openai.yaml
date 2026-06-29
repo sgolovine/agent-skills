@@ -1,0 +1,4 @@
+interface:
+  display_name: "HTML Report Builder"
+  short_description: "Build themed HTML reports from reusable components"
+  default_prompt: "Use $html-report-builder to create a polished HTML report from the available component kit."

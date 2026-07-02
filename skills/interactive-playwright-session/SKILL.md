@@ -1,133 +1,106 @@
 ---
 name: interactive-playwright-session
-description: Start and coordinate one reusable visible Playwright-controlled Chrome session that the user can interact with. Use when browser automation needs human-in-the-loop steps such as lengthy authentication, MFA, consent screens, captchas, SSO, or manual setup before Codex continues debugging, inspection, screenshots, console/network collection, or repeated local browser checks.
+description: Run browser automation through one reusable visible Playwright-controlled Chrome window the user can interact with. Use when browser work needs human-in-the-loop steps such as login, MFA, SSO, captchas, consent screens, or manual setup before automation continues with debugging, screenshots, or console/network collection.
 ---
 
 # Interactive Playwright Session
 
-Use this skill when browser work should run through one reusable visible Chrome window so the user can complete human-only steps before Codex continues automation.
+Run browser work that needs human interaction through one visible Chrome window, driven by the bundled script at this skill's `scripts/interactive-playwright-session.mjs`. Resolve that path to an absolute path once (from this SKILL.md's location) and reuse it in every command below as `$INTERACTIVE_PLAYWRIGHT_SESSION_SCRIPT`.
 
-## Session Invariants
+## Rules
 
-- Use exactly one daemon for the run.
-- Use the bundled script at this skill's `scripts/interactive-playwright-session.mjs`.
-- Start headed by default; do not pass `--headless` unless the user explicitly no longer needs to interact with the browser.
-- Launch the Playwright Chrome channel by default. Use `--channel chromium` only when Google Chrome is unavailable and the user accepts Chromium.
-- Store daemon state under `$RUN_DIR/browser-session/session.json`.
-- Pass `BROWSER_SESSION_STATE_FILE="$RUN_DIR/browser-session/session.json"` to every browser-using agent.
-- Use one browser context. Create multiple tabs in that context instead of multiple contexts, profiles, Browser plugin sessions, Playwright processes, or Chrome processes.
-- Bind command access to `127.0.0.1`; the script stores the bearer token in the state file and protects command and shutdown endpoints with it.
-- Use an installed workspace `playwright` dependency. Do not use `npx` to download a transient Playwright copy.
-- Treat the state file as command access and ownership state, not as a durable browser storage snapshot. Cookies, storage, and tabs are usable while the daemon is running but should not be assumed to survive daemon stop or restart.
+- One daemon per run. Never start a second daemon, a separate Playwright process, or a raw Chrome process for the same task.
+- One browser context. Open multiple tabs for parallel work; never create extra contexts or profiles.
+- Headed by default so the user can interact. Pass `--headless` only if the user explicitly no longer needs to see the browser.
+- Launches the Chrome channel by default. Pass `--channel chromium` only when Google Chrome is unavailable and the user accepts Chromium.
+- Run all script commands from the target repo's root so Node resolves that repo's installed `playwright` dependency. Do not use `npx` to fetch a transient Playwright copy; if `playwright` is not installed in the workspace, stop and tell the user rather than installing it silently.
+- The daemon binds to `127.0.0.1` and requires a bearer token stored in the state file, so the state file path is the only handle agents need. Treat it as an access handle, not durable browser storage: cookies, storage, and tabs are usable while the daemon runs but do not survive a stop or restart.
+- The daemon shuts itself down after 30 minutes without commands (override with `--idle-ms <ms>` on start — consider a longer value if the user may take a while to authenticate). If a command fails because the daemon is gone, check `status`, then restart; the user will need to authenticate again.
 
-## Locate The Script
+## Start
 
-Set `INTERACTIVE_PLAYWRIGHT_SESSION_SCRIPT` to the absolute path of the bundled script before giving commands to other agents:
+Pick a run directory `$RUN_DIR` for this task's artifacts (an existing run/output directory if the workflow has one, otherwise create one, e.g. `.agent-runs/<task>`). The state file will be written to `$RUN_DIR/browser-session/session.json`.
 
-```sh
-INTERACTIVE_PLAYWRIGHT_SESSION_SCRIPT="/path/to/interactive-playwright-session/scripts/interactive-playwright-session.mjs"
-```
-
-When this skill is installed from `agent-skills`, the repo copy is:
-
-```sh
-INTERACTIVE_PLAYWRIGHT_SESSION_SCRIPT="/home/sgolovine/Projects/agent-skills/skills/interactive-playwright-session/scripts/interactive-playwright-session.mjs"
-```
-
-## Start And Handoff
-
-Run commands from the target repo root so Node resolves that repo's `playwright` dependency.
-
-Start the visible Chrome session after the run directory exists:
+Start at the login or app URL so the window opens somewhere useful:
 
 ```sh
 node "$INTERACTIVE_PLAYWRIGHT_SESSION_SCRIPT" start --run-dir "$RUN_DIR" --fresh --url "$LOGIN_OR_APP_URL"
 ```
 
-Record the JSON output in the run log or handoff notes, including:
+Notes:
 
-- state file path
-- daemon log path
-- process id
-- command string
-- stop string
-- mode
-- browser channel
-- active tabs
-- cleanup ownership
+- Without `--fresh`, start fails if a healthy session already exists at that state file. Reuse the existing session in that case; pass `--fresh` only when you intend to replace it.
+- Optional start flags: `--headless`, `--channel <chrome|chromium>`, `--viewport <WxH>` (default 1280x720), `--idle-ms <ms>`, `--timeout <ms>` (startup wait, default 15000).
+- On success, start prints JSON with `stateFile`, `logFile`, `pid`, `port`, `mode`, `browserChannel`, a ready-to-use `command` prefix, and a `stop` command. Record `stateFile` and `logFile` in the run log or handoff notes.
 
-Health-check the daemon before browser work:
+Set the state file variable and health-check before browser work:
 
 ```sh
 BROWSER_SESSION_STATE_FILE="$RUN_DIR/browser-session/session.json"
 node "$INTERACTIVE_PLAYWRIGHT_SESSION_SCRIPT" status --state-file "$BROWSER_SESSION_STATE_FILE"
 ```
 
-When human authentication or setup is required, tell the user the visible Chrome window is ready and ask them to complete the flow in that window. Pause automation that depends on the authenticated state until the user confirms completion, then verify with a cheap command such as `url`, `title`, `text`, or a screenshot.
+## Human Handoff
 
-Do not ask the user to share passwords, one-time codes, cookies, tokens, or session storage. Do not dump authentication cookies or storage unless the task specifically requires it; prefer screenshots, current URL, page text, console events, and bounded network failures.
+Use this sequence for logins, SSO, MFA, captchas, or manual setup:
 
-## Handoff Contract
+1. Start the session at the login or app URL and confirm the daemon is healthy.
+2. Tell the user the Chrome window is ready and ask them to complete the flow in it, reporting back when done.
+3. Pause all automation that depends on the authenticated state until the user confirms. Do not click or navigate while they are actively completing auth, unless they ask for help and the action is clearly non-sensitive.
+4. After confirmation, verify the expected state with a cheap command on the same tab: `url`, `title`, `text`, or a screenshot.
+5. Continue automation in the same browser context.
 
-Every browser-using subagent must receive:
+Never ask the user for passwords, one-time codes, cookies, tokens, or session storage. Do not dump cookies or storage unless the task specifically requires it; prefer screenshots, the current URL, page text, console events, and bounded network captures.
 
-- target repo root
-- run directory path
-- `BROWSER_SESSION_STATE_FILE`
-- command prefix: `node "$INTERACTIVE_PLAYWRIGHT_SESSION_SCRIPT" command --state-file "$BROWSER_SESSION_STATE_FILE"`
-- assigned tab id or instructions to create one
-- viewport assignment if a fixed viewport is required
-- evidence directory
-- lock expectations
-- rule that no separate browser session may be created
-- note that the user may be interacting with the visible Chrome window during human handoff periods
+## Handoff To Subagents
 
-Allocate separate tabs for independent agents. Use per-tab commands for tab-scoped work and avoid sharing one tab between concurrent agents. If stable tab ownership is unavailable, run browser-using agents serially.
+Give every browser-using subagent:
+
+- the target repo root (its working directory)
+- `BROWSER_SESSION_STATE_FILE` (the script also reads this env var, so `--state-file` may be omitted when it is exported)
+- the command prefix: `node "$INTERACTIVE_PLAYWRIGHT_SESSION_SCRIPT" command --state-file "$BROWSER_SESSION_STATE_FILE"`
+- its assigned tab id, or instructions to create its own tab with `newtab`
+- the evidence directory for its screenshots and captures
+- the rule that it must not start any other browser session
+- a note that the user may be interacting with the visible window during handoff periods
+
+Give each concurrent agent its own tab and have it pass `--tab <id>` on every command — commands without `--tab` target the daemon's active tab, which changes as tabs open and close (including when the user clicks around). If stable tab ownership can't be maintained, run browser-using agents serially instead.
 
 ## Commands
 
-Create a tab and capture a screenshot:
-
 ```sh
-BROWSER_SESSION_STATE_FILE="$RUN_DIR/browser-session/session.json"
 node "$INTERACTIVE_PLAYWRIGHT_SESSION_SCRIPT" command --state-file "$BROWSER_SESSION_STATE_FILE" newtab http://localhost:8080
 node "$INTERACTIVE_PLAYWRIGHT_SESSION_SCRIPT" command --state-file "$BROWSER_SESSION_STATE_FILE" screenshot --tab 1 --path "$RUN_DIR/screenshots/home.png" --full-page
 ```
 
-Common command verbs:
+`newtab` returns the new tab's id; use it for all subsequent `--tab` arguments.
 
-- Browser/global: `newtab`, `tabs`, `tab`, `closetab`, `status`, `clear-events`
-- Navigation: `goto`, `reload`, `back`, `forward`
-- Waiting and inspection: `wait`, `wait-for`, `title`, `url`, `text`
-- Interaction: `click`, `fill`, `type`, `press`, `hover`, `select`, `scroll`, `setviewport`
-- Evidence: `screenshot`, `cookies`, `storage`, `console`, `network`, `dialogs`
-- Batches: `node "$INTERACTIVE_PLAYWRIGHT_SESSION_SCRIPT" batch --state-file "$BROWSER_SESSION_STATE_FILE" --file <commands.json>`
+- Tabs: `newtab [url]`, `tabs`, `tab <id>` (make active), `closetab [--tab <id>]`, `status`, `clear-events`
+- Navigation: `goto <url>`, `reload`, `back`, `forward` (all accept `--wait-until <state>`, default `domcontentloaded`)
+- Waiting/inspection: `wait <ms>`, `wait-for <selector> [--state visible|attached|hidden|detached]`, `title`, `url`, `text [selector] [--limit <chars>]`
+- Interaction: `click <selector>`, `fill <selector> <value>`, `type <selector> <text>`, `press <selector> <key>`, `hover <selector>`, `select <selector> <value>`, `scroll <x> <y>` (or `scroll bottom`), `setviewport <WxH>`
+- Evidence: `screenshot --path <file> [--full-page]`, `cookies`, `storage`, `console [--limit <n>]`, `network [--limit <n>]`, `dialogs [--limit <n>]`
 
-## Human Handoff Pattern
+For multi-step sequences, batch commands in one call:
 
-Use this sequence for apps with SSO, MFA, captchas, or long account setup:
+```sh
+node "$INTERACTIVE_PLAYWRIGHT_SESSION_SCRIPT" batch --state-file "$BROWSER_SESSION_STATE_FILE" --file commands.json
+```
 
-1. Start the session at the login or app URL.
-2. Confirm the daemon is healthy and the initial tab exists.
-3. Ask the user to complete authentication in the visible Chrome window and report when finished.
-4. After confirmation, run `url`, `title`, `text`, or `screenshot` on the same tab to confirm the expected app state.
-5. Continue debugging or automation in the same browser context.
-
-Avoid automated clicks or navigation while the user is actively completing auth unless the user asks for help and the action is clearly non-sensitive.
+where `commands.json` is `{"commands": [{"command": "goto", "args": ["http://localhost:8080"], "tabId": 1}, ...]}` — each entry takes `command`, `args` (array), optional `tabId`, and optional `options` (the `--flag` values as keys).
 
 ## Evidence Limits
 
-- Keep console, network, and dialog evidence bounded and summarized.
-- Store screenshots and compact JSON/text evidence under the run directory.
-- Do not mirror raw CDP streams, WebSocket frames, full browser logs, cookies, storage, or unbounded console/event dumps into terminal output, run logs, or stack logs.
-- If a browser event contains recursive Vite forwarding text, store a short summary and stop collecting that message class for the page.
+- Keep console, network, and dialog captures bounded: use `--limit`, summarize, and store compact JSON/text and screenshots under the run directory.
+- Do not dump raw event streams, full browser logs, cookies, storage, or unbounded console output into terminal output or run logs.
+- If a page emits the same noisy message repeatedly (e.g. dev-server reload loops), record one short summary and stop collecting that message class.
 
 ## Cleanup
 
-Stop only the daemon started for the current run:
+Before stopping, confirm the user is done with the window — stopping closes it and discards the authenticated session. Stop only the daemon this run started:
 
 ```sh
 node "$INTERACTIVE_PLAYWRIGHT_SESSION_SCRIPT" stop --state-file "$RUN_DIR/browser-session/session.json"
 ```
 
-Never close the user's normal browser, an unrelated browser session, or another run's Playwright process. If cleanup cannot confirm ownership, leave the process running and report the uncertainty with the state file and daemon log path.
+Never kill the user's normal browser or another run's Playwright process by pid. If you can't confirm the daemon belongs to this run, leave it running and report that, along with the state file and daemon log paths.

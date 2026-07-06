@@ -17,35 +17,27 @@ Infer the target repository from the current working directory. If no git reposi
 
 ## Baseline
 
-1. Inspect repository state before changing anything:
-   - `git status --short --branch`
-   - `git remote -v`
-   - `git branch --show-current`
-   - `git rev-parse --show-toplevel`
+1. Inspect repository state before changing anything: `git status --short --branch` and `git remote -v`.
 2. Identify the base branch:
    - Use the branch named by the user when provided.
-   - Otherwise use the remote default branch from `origin/HEAD`.
+   - Otherwise use the remote default branch from `origin/HEAD`; if `origin/HEAD` is unset, resolve it with `git remote show origin`.
    - If that is unavailable, choose the existing `main` or `master` branch only when unambiguous; otherwise ask.
 3. Preserve unrelated local work:
    - If the working tree has uncommitted changes before starting, inspect enough to decide whether they are relevant.
    - Do not overwrite, revert, stash, or commit pre-existing user changes without explicit intent.
    - If unrelated changes would block baseline setup, create a separate worktree or ask for direction.
-4. Update the base branch:
-   - Fetch remotes with pruning.
-   - Switch to the base branch or create a worktree from it if needed to protect local state.
-   - Fast-forward the base branch from its upstream. If fast-forward is impossible, stop and report the branch divergence.
-5. Create a task branch from the updated base branch. Use `codex/<short-kebab-summary>` unless the user requests another name. Avoid reusing an existing branch unless it is clearly the active task branch.
+4. Fetch remotes with pruning, then create the task branch directly from the remote base ref, for example `git switch -c codex/<short-kebab-summary> --no-track origin/<base>`. Do not switch to or fast-forward the local base branch; the workflow does not need it, and it may hold user state. If the repository has no remote, branch from the local base branch and note that push and PR steps will be blocked.
+5. Use `codex/<short-kebab-summary>` as the branch name unless the user requests another name. Avoid reusing an existing branch unless it is clearly the active task branch.
 
 ## Plan
 
-Before editing, create a concise implementation plan in the conversation or a project-local plan file when the change is large. Include:
+Before editing, create a concise implementation plan in the conversation. If the change is large enough to warrant a plan file, keep that file out of the commit and PR. Include:
 
 - the requested outcome in concrete terms,
 - relevant files, modules, APIs, commands, or workflows discovered from the repo,
 - assumptions and any accepted clarifications,
 - ordered implementation steps,
-- validation criteria that define done behavior,
-- test commands, manual checks, screenshots, logs, or review evidence required before opening the PR,
+- validation criteria that define done behavior, and the evidence required before opening the PR: test commands, manual checks, screenshots, or logs,
 - risks, migrations, compatibility concerns, or rollout notes when relevant.
 
 If the plan reveals a material gap, ask before implementation. Otherwise proceed.
@@ -72,21 +64,15 @@ Run the repo's relevant checks before opening the PR. Prefer discovered project 
 
 If a check fails, fix the cause and rerun the relevant check. If a check cannot be run because of missing credentials, services, packages, time, or environment constraints, record the exact command, failure, and residual risk in the PR.
 
-Before committing, inspect:
-
-- `git status --short`
-- `git diff`
-- `git diff --stat`
-- staged diff after staging
+Before committing, review `git status --short` and the full diff, then the staged diff after staging.
 
 ## Commit And PR
 
 1. Stage only files that belong to the task.
 2. Commit the implementation with a focused message that follows the repository's convention. If no convention is discoverable, use Conventional Commits.
-3. Push the task branch to the remote.
-4. Open a draft pull request by default. Use a ready-for-review PR only when the user explicitly requests it.
-5. Set the PR base to the baseline branch established earlier.
-6. Write the PR body with:
+3. Push the task branch with an upstream: `git push -u origin <branch>`.
+4. Open a draft pull request by default with `gh pr create --draft --base <base>`, where `<base>` is the baseline branch established earlier. Use a ready-for-review PR only when the user explicitly requests it. If `gh` is unavailable or unauthenticated, leave the branch pushed and report the compare URL as the blocker instead of retrying other tooling.
+5. Write the PR body with:
    - summary of the user-facing or developer-facing change,
    - implementation notes that matter for review,
    - validation commands and outcomes,

@@ -29,6 +29,7 @@ type Skill = {
 };
 
 type InstallStatus = "conflict" | "installed" | "missing";
+type Action = "install" | "manage";
 
 type InstallState = {
   status: InstallStatus;
@@ -41,7 +42,7 @@ function isNodeError(error: unknown): error is NodeJS.ErrnoException {
 
 function handleCancel<T>(value: T | symbol): T {
   if (isCancel(value)) {
-    cancel("Installation cancelled.");
+    cancel("Cancelled.");
     process.exit(0);
   }
 
@@ -165,6 +166,18 @@ async function installSkill(
   return { name: skill.name, status: "installed" };
 }
 
+async function removeSkill(
+  skill: Skill,
+  state: InstallState,
+): Promise<{ name: string; status: string }> {
+  if (state.status !== "installed") {
+    return { name: skill.name, status: "skipped: not installed" };
+  }
+
+  await fs.unlink(state.targetPath);
+  return { name: skill.name, status: "removed" };
+}
+
 function getKnownInstallState(
   installStates: Map<string, InstallState>,
   skill: Skill,
@@ -179,7 +192,7 @@ function getKnownInstallState(
 }
 
 function printHelp(): void {
-  console.log(`Install agent skills.
+  console.log(`Install or manage agent skills.
 
 Usage:
   npm run install:skills
@@ -193,7 +206,7 @@ if (process.argv.slice(2).some((arg) => helpFlags.has(arg))) {
   process.exit(0);
 }
 
-intro("Install agent skills");
+intro("Install or manage agent skills");
 
 const skills = await discoverSkills();
 
@@ -202,9 +215,25 @@ if (skills.length === 0) {
   process.exit(0);
 }
 
+const action = handleCancel(
+  await select<Action>({
+    message: "What do you want to do?",
+    options: [
+      {
+        value: "install",
+        label: "Install new skills",
+      },
+      {
+        value: "manage",
+        label: "Manage installed skills",
+      },
+    ],
+  }),
+);
+
 const installScope = handleCancel(
   await select<"global" | "project">({
-    message: "Where do you want to install skills?",
+    message: "Which skill context do you want to use?",
     options: [
       {
         value: "global",
@@ -246,10 +275,31 @@ for (const skill of skills) {
   installStates.set(skill.dirName, await getInstallState(targetDir, skill));
 }
 
+const selectableSkills = skills.filter((skill) => {
+  const state = getKnownInstallState(installStates, skill);
+  return action === "install"
+    ? state.status !== "installed"
+    : state.status === "installed";
+});
+
+if (selectableSkills.length === 0) {
+  const title = action === "install" ? "Nothing to install" : "Nothing to manage";
+  const message =
+    action === "install"
+      ? `All available skills are already installed in ${targetDir}.`
+      : `No managed skills are installed in ${targetDir}.`;
+
+  note(message, title);
+  process.exit(0);
+}
+
 const selectedSkills = handleCancel(
   await multiselect<string>({
-    message: `Select skills to install into ${targetDir}`,
-    options: skills.map((skill) => {
+    message:
+      action === "install"
+        ? `Select skills to install into ${targetDir}`
+        : `Select installed skills to remove from ${targetDir}`,
+    options: selectableSkills.map((skill) => {
       const state = getKnownInstallState(installStates, skill);
       const option = {
         value: skill.dirName,
@@ -269,20 +319,27 @@ const selectedSkills = handleCancel(
   }),
 );
 
-const selected = skills.filter((skill) => selectedSkills.includes(skill.dirName));
+const selected = selectableSkills.filter((skill) => selectedSkills.includes(skill.dirName));
 const s = spinner();
 
-s.start("Installing selected skills");
-await fs.mkdir(targetDir, { recursive: true });
+s.start(action === "install" ? "Installing selected skills" : "Removing selected skills");
+
+if (action === "install") {
+  await fs.mkdir(targetDir, { recursive: true });
+}
 
 const results = [];
 
 for (const skill of selected) {
   const state = getKnownInstallState(installStates, skill);
-  results.push(await installSkill(skill, state));
+  results.push(
+    action === "install"
+      ? await installSkill(skill, state)
+      : await removeSkill(skill, state),
+  );
 }
 
-s.stop("Install complete");
+s.stop(action === "install" ? "Install complete" : "Removal complete");
 
 note(
   results.map((result) => `${result.name}: ${result.status}`).join("\n"),

@@ -11,7 +11,7 @@ Assemble reports from the component kit, then adapt the content, hierarchy, and 
 
 ## Workflow
 
-1. Resolve the report purpose, audience, source data, output path, and whether the result should be a single self-contained HTML file or an HTML file with adjacent assets.
+1. Resolve the report purpose, audience, source data, output directory, and whether the result should be a single self-contained HTML file or an HTML file with adjacent assets. Set the final HTML filename to `<report_name>.report.html`; every HTML report MUST end with `.report.html`. Preserve the requested directory and meaningful base name, replace a trailing `.html` with `.report.html`, append `.report.html` when needed, and leave an existing `.report.html` suffix unchanged.
 2. Read `references/component-directory.md` first. Treat it as the directory and single source of truth for available components and asset locations.
 3. For a new report, start from `assets/report-kit/report-template.html`. For an existing report, copy or merge `assets/report-kit/report.css`.
 4. Copy component markup only from `assets/report-kit/components.html`, using the `data-component` IDs listed in the directory. Keep semantic HTML, ARIA labels, table headers, and CSS class names intact unless the report requires a clear change.
@@ -23,7 +23,7 @@ Assemble reports from the component kit, then adapt the content, hierarchy, and 
 6. Keep the default style stark, grayscale, square, dense, and print-oriented. Transfer only visual rules from any style reference; never copy its subject matter, wording, labels, examples, or domain-specific class names into a report.
 7. Prefer static, dependency-free charts from the kit for simple comparisons, distributions, trends, and proportions. Use a charting library only when the user needs interaction, precise axes, large datasets, or chart types outside the kit.
 8. Theme by editing CSS custom properties in `:root` or adding a scoped theme class. Preserve the strong rules, square geometry, compact type scale, and shared-edge layout unless the user explicitly requests a different style.
-9. Before finishing, verify the HTML renders cleanly in a browser when feasible. Check desktop and mobile widths, print styles for printable reports, table overflow, chart labels, contrast, and that no text overlaps or clips. Confirm the report contains only the user's content and generic kit placeholders, never content from a style reference.
+9. Before finishing, verify the HTML renders cleanly in a browser when feasible. Check desktop and mobile widths, print styles for printable reports, table overflow, chart labels, contrast, and that no text overlaps or clips. Confirm the report contains only the user's content and generic kit placeholders, never content from a style reference, and that the final artifact's filename ends with `.report.html`.
 
 ## Resource Map
 
@@ -40,6 +40,7 @@ Assemble reports from the component kit, then adapt the content, hierarchy, and 
 
 ## Report Requirements
 
+- Output every HTML report as `<report_name>.report.html`; no final HTML artifact may use another filename suffix.
 - Use one `h1` per report and preserve a logical heading order.
 - Keep the first viewport useful: title, context, date or scope, and key takeaways.
 - Put raw data in tables when exact values matter; add chart summaries for visual scanning.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Commit and PR"
+  short_description: "Commit local changes and open a GitHub PR"
+  default_prompt: "Use $commit-and-pr to commit all local changes and open a GitHub pull request."

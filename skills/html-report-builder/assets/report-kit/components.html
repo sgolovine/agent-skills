@@ -8,16 +8,24 @@
   </head>
   <body>
     <main class="report-shell component-library">
-      <section data-component="report-cover">
-        <div class="eyebrow">Quarterly Report</div>
-        <h1>Customer Health Review</h1>
-        <p class="deck">A concise overview of customer health, retention signals, and the highest-priority actions for the next operating cycle.</p>
-        <div class="report-meta" aria-label="Report metadata">
-          <span class="meta-item">Prepared for: Leadership</span>
-          <span class="meta-item">Period: Q2 FY26</span>
-          <span class="meta-item">Source: CRM and product analytics</span>
+      <header class="report-cover" data-component="report-cover">
+        <div class="form-banner">
+          <div class="report-code" aria-hidden="true">
+            <span class="label">Report</span>
+            <span class="code">01</span>
+          </div>
+          <div class="form-title">
+            <div class="eyebrow">Quarterly report</div>
+            <h1>Customer Health Review</h1>
+          </div>
+          <div class="report-meta" aria-label="Report metadata">
+            <span class="meta-item"><strong>Audience:</strong> Leadership</span>
+            <span class="meta-item"><strong>Period:</strong> Q2 FY26</span>
+            <span class="meta-item"><strong>Source:</strong> CRM and product analytics</span>
+          </div>
         </div>
-      </section>
+        <p class="deck">A concise overview of customer health, retention signals, and the highest-priority actions for the next operating cycle.</p>
+      </header>
 
       <section class="report-section" data-component="section-header">
         <div class="section-header">
@@ -89,19 +97,19 @@
                 <th scope="row">Targeted onboarding</th>
                 <td>Improves activation for high-fit accounts.</td>
                 <td>Medium</td>
-                <td><span class="status-pill good">Recommended</span></td>
+                <td><span class="status-label good">Recommended</span></td>
               </tr>
               <tr>
                 <th scope="row">Broad discounting</th>
                 <td>May reduce near-term churn but weakens margin.</td>
                 <td>High</td>
-                <td><span class="status-pill warn">Needs review</span></td>
+                <td><span class="status-label warn">Needs review</span></td>
               </tr>
               <tr>
                 <th scope="row">No change</th>
                 <td>Maintains current risk profile.</td>
                 <td>Low</td>
-                <td><span class="status-pill bad">Not advised</span></td>
+                <td><span class="status-label bad">Not advised</span></td>
               </tr>
             </tbody>
           </table>
@@ -181,14 +189,14 @@
         </div>
         <article class="chart-panel" aria-label="Pipeline mix by stage">
           <div class="stacked-bar">
-            <span class="stack-segment" style="--value: 45%; --segment-color: #2563eb;"></span>
-            <span class="stack-segment" style="--value: 30%; --segment-color: #12805c;"></span>
-            <span class="stack-segment" style="--value: 25%; --segment-color: #a15c07;"></span>
+            <span class="stack-segment" style="--value: 45%; --segment-color: #000000;"></span>
+            <span class="stack-segment" style="--value: 30%; --segment-color: #777777;"></span>
+            <span class="stack-segment" style="--value: 25%; --segment-color: #d0d0d0;"></span>
           </div>
           <div class="chart-legend">
-            <span><span class="legend-dot" style="--segment-color: #2563eb;"></span>Qualified 45%</span>
-            <span><span class="legend-dot" style="--segment-color: #12805c;"></span>Proposal 30%</span>
-            <span><span class="legend-dot" style="--segment-color: #a15c07;"></span>Commit 25%</span>
+            <span><span class="legend-dot" style="--segment-color: #000000;"></span>Qualified 45%</span>
+            <span><span class="legend-dot" style="--segment-color: #777777;"></span>Proposal 30%</span>
+            <span><span class="legend-dot" style="--segment-color: #d0d0d0;"></span>Commit 25%</span>
           </div>
         </article>
       </section>

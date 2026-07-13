@@ -1,0 +1,4 @@
+interface:
+  display_name: "Up to Speed"
+  short_description: "Build a senior-level repository briefing"
+  default_prompt: "Use $up-to-speed to analyze this repository and publish an HTML onboarding report."

@@ -1,6 +1,6 @@
 # Theming
 
-Retheme reports through CSS custom properties. Keep component markup stable and change tokens first.
+Retheme reports through CSS custom properties. Keep component markup stable and change tokens first. The default theme is a grayscale printed form; preserve its square geometry, border hierarchy, compact type, and shared edges even when adjusting colors.
 
 ## Token Groups
 
@@ -8,34 +8,33 @@ Edit these variables in `assets/report-kit/report.css` or override them in the f
 
 | Token Group | Variables |
 | --- | --- |
-| Base HSL | `--background`, `--foreground`, `--card`, `--card-foreground`, `--muted`, `--muted-foreground`, `--border`, `--primary`, `--primary-foreground`, `--accent`, `--accent-foreground` |
-| Report Aliases | `--report-bg`, `--report-surface`, `--report-border`, `--report-shadow`, `--report-text`, `--report-muted`, `--report-subtle`, `--report-accent`, `--report-accent-strong`, `--report-accent-soft` |
-| State | `--report-success`, `--report-warning`, `--report-danger`, `--report-info` |
-| Layout | `--report-max-width`, `--report-radius`, `--report-gap`, `--report-density` |
+| Palette | `--report-ink`, `--report-muted`, `--report-bg`, `--report-surface`, `--report-border`, `--report-shade`, `--report-white` |
+| Rules | `--report-outer-rule`, `--report-header-rule`, `--report-inner-rule` |
+| Layout | `--report-max-width`, `--report-density` |
 
 ## Theme Pattern
 
-Use a scoped class when one document needs multiple looks or when preserving the base kit:
+Use a scoped class when one document needs multiple looks or when preserving the base kit. Keep the example neutral and grayscale:
 
 ```css
-.report-theme-forest {
-  --primary: 151 45% 34%;
-  --accent: 145 39% 92%;
-  --accent-foreground: 151 56% 20%;
+.report-theme-soft-gray {
+  --report-bg: #eeeeee;
+  --report-shade: #d9d9d9;
+  --report-muted: #444444;
 }
 ```
 
-Apply it to `<body class="report-theme-forest">` or a wrapper.
+Apply it to `<body class="report-theme-soft-gray">` or a wrapper.
 
 ## Density
 
-- For executive reports, keep the default spacing.
-- For dense operational reports, reduce `--report-gap` and `--report-density`.
-- Do not shrink fonts below readable report text sizes; use fewer columns before using tiny text.
+- Keep the default compact spacing for ordinary reports.
+- Adjust `--report-density` slightly for unusually sparse or dense material.
+- Use fewer columns before shrinking text below the default compact scale.
 
 ## Print
 
-The CSS includes print rules for white backgrounds, reduced shadows, visible borders, and page breaks. For print-focused reports:
+The CSS includes print rules for a white page background, visible borders, and page breaks. For print-focused reports:
 
 - Keep charts simple.
 - Avoid relying on sticky table behavior.

@@ -2,6 +2,8 @@
 
 Use the component kit to make the report easy to scan first and useful to inspect second.
 
+Place `report-cover` first, then group report sections in `.report-grid`. Use `.wide` on a section only when its table, chart, or narrative genuinely needs both columns. The grid collapses to one column on narrow screens.
+
 ## Common Structures
 
 ### Executive Summary
@@ -47,6 +49,7 @@ Use the component kit to make the report easy to scan first and useful to inspec
 - Use short section summaries before dense tables.
 - Keep labels concrete: prefer "Revenue by Segment" over "Chart 1".
 - Use appendix notes for assumptions, caveats, methodology, definitions, and source limitations.
+- Treat visual references as style input only. Use report content solely from the user's sources or neutral placeholders.
 
 ## Accessibility Checks
 

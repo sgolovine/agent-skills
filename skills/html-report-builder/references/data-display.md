@@ -4,7 +4,7 @@ Choose the least complex display that preserves the meaning of the source data.
 
 ## Tables
 
-Use `comparison-table` when rows are options, scenarios, vendors, segments, or recommendations. Keep cells concise and use status pills only for categorical states.
+Use `comparison-table` when rows are options, scenarios, vendors, segments, or recommendations. Keep cells concise and use square status labels only for categorical states.
 
 Use `data-table` when exact values matter. Preserve units in headers or cells, align numeric values consistently, and keep source values available even when also charted.
 
@@ -38,7 +38,7 @@ The kit supports static chart components without JavaScript.
 
 - Store chart values in visible text as well as visual attributes.
 - For `bar-chart`, set `--value` to a percentage width and keep the label value visible.
-- For `stacked-bar`, ensure segment widths add to `100%`.
+- For `stacked-bar`, ensure segment widths add to `100%` and use distinguishable grayscale fills or patterns.
 - For `sparkline-panel`, update the SVG `polyline` points and the adjacent summary text.
 - For `donut-progress`, set `--percent` to a percent value and update the center label.
 

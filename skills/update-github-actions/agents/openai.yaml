@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Actions Updater"
+  short_description: "Update official actions and report upgrade risks"
+  default_prompt: "Use $update-github-actions to update every actions/* reference in this project to its latest stable major version and generate the HTML report."

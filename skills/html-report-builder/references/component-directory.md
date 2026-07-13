@@ -17,7 +17,7 @@ This file is the report kit directory and the single source of truth for what co
 | `references/report-composition.md` | Choosing a report structure, section order, heading hierarchy, or accessibility checks. |
 | `references/data-display.md` | Choosing tables, metrics, chart types, chart fallbacks, or data formatting. |
 | `references/theming.md` | Retheming, changing density, making print-ready output, or adapting responsiveness. |
-| `references/solid-ui-style-reference.md` | Creating or changing visual style using Solid UI as the theme and component-shape reference. |
+| `references/printed-form-style-reference.md` | Creating or changing the grayscale printed-form visual style, density, borders, or component shape. |
 
 ## Component Catalog
 
@@ -43,4 +43,4 @@ This file is the report kit directory and the single source of truth for what co
 - For an executive report, lead with `metric-summary` and `insight-callout`, then add supporting `data-table` or `bar-chart` evidence.
 - For analysis reports, use more `section-header` and `subsection-header` blocks, keep exact values in `data-table`, and add charts only where they reduce comparison effort.
 - For printable reports, load `references/theming.md` and keep component widths within the template shell.
-- For new visual styling, load `references/solid-ui-style-reference.md` and keep the copy-paste, themeable component model.
+- For visual styling changes, load `references/printed-form-style-reference.md` and keep the copy-paste, themeable component model.

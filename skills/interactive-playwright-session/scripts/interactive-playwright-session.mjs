@@ -379,7 +379,7 @@ class BrowserManager {
     this.browser = await chromium.launch(launchOptions);
     this.context = await this.browser.newContext({
       viewport: this.headless ? this.viewport : null,
-      deviceScaleFactor: 1,
+      ...(this.headless ? { deviceScaleFactor: 1 } : {}),
     });
     this.context.on("page", (page) => this.registerPage(page));
     await this.newTab(initialUrl);

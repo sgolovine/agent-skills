@@ -7,7 +7,7 @@ description: "Run an end-to-end autonomous feature development workflow in a cod
 
 ## Operating Principle
 
-Move like a careful project maintainer: preserve unrelated work, make the intended base explicit, plan before editing, verify with the repo's own checks, and open a draft PR only when the implementation and evidence are coherent.
+Move like a careful project maintainer: preserve unrelated work, make the intended parent explicit, plan before editing, verify with the repo's own checks, and open a draft PR only when the implementation and evidence are coherent.
 
 ## Inputs
 
@@ -18,15 +18,16 @@ Infer the target repository from the current working directory. If no git reposi
 ## Baseline
 
 1. Inspect repository state before changing anything: `git status --short --branch` and `git remote -v`.
-2. Identify the base branch:
-   - Use the branch named by the user when provided.
-   - Otherwise use the remote default branch from `origin/HEAD`; if `origin/HEAD` is unset, resolve it with `git remote show origin`.
-   - If that is unavailable, choose the existing `main` or `master` branch only when unambiguous; otherwise ask.
+2. Identify a parent branch from `main`, `master`, or `develop`:
+   - If the user names the parent, require it to be one of those three and to exist; otherwise stop and ask for a supported parent.
+   - When the user does not name the parent, use the remote default branch when it is one of those three; resolve an unset `origin/HEAD` with `git remote show origin`.
+   - If the remote default is unavailable or has another name, use an existing branch in this order: `main`, `master`, then `develop`.
+   - If none exists, stop and ask which supported parent branch to create or use. Do not base autonomous development on any other branch.
 3. Preserve unrelated local work:
    - If the working tree has uncommitted changes before starting, inspect enough to decide whether they are relevant.
    - Do not overwrite, revert, stash, or commit pre-existing user changes without explicit intent.
    - If unrelated changes would block baseline setup, create a separate worktree or ask for direction.
-4. Fetch remotes with pruning, then create the task branch directly from the remote base ref, for example `git switch -c codex/<short-kebab-summary> --no-track origin/<base>`. Do not switch to or fast-forward the local base branch; the workflow does not need it, and it may hold user state. If the repository has no remote, branch from the local base branch and note that push and PR steps will be blocked.
+4. Fetch remotes with pruning, then create a new task branch from the selected parent before making changes, for example `git switch -c codex/<short-kebab-summary> --no-track origin/<parent>`. Never develop directly on `main`, `master`, or `develop`. Do not switch to or fast-forward the local parent branch; the workflow does not need it, and it may hold user state. If the parent has no remote ref, branch from the local parent and note that push and PR steps may be blocked.
 5. Use `codex/<short-kebab-summary>` as the branch name unless the user requests another name. Avoid reusing an existing branch unless it is clearly the active task branch.
 
 ## Plan
@@ -71,7 +72,7 @@ Before committing, review `git status --short` and the full diff, then the stage
 1. Stage only files that belong to the task.
 2. Commit the implementation with a focused message that follows the repository's convention. If no convention is discoverable, use Conventional Commits.
 3. Push the task branch with an upstream: `git push -u origin <branch>`.
-4. Open a draft pull request by default with `gh pr create --draft --base <base>`, where `<base>` is the baseline branch established earlier. Use a ready-for-review PR only when the user explicitly requests it. If `gh` is unavailable or unauthenticated, leave the branch pushed and report the compare URL as the blocker instead of retrying other tooling.
+4. Open a draft pull request by default with `gh pr create --draft --base <parent>`, where `<parent>` is the parent branch established earlier. Use a ready-for-review PR only when the user explicitly requests it. If `gh` is unavailable or unauthenticated, leave the branch pushed and report the compare URL as the blocker instead of retrying other tooling.
 5. Write the PR body with:
    - summary of the user-facing or developer-facing change,
    - implementation notes that matter for review,

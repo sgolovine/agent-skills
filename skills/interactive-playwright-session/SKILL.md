@@ -13,7 +13,7 @@ Run browser work that needs human interaction through one visible Chrome window,
 - One browser context. Open multiple tabs for parallel work; never create extra contexts or profiles.
 - Headed by default so the user can interact. Pass `--headless` only if the user explicitly no longer needs to see the browser.
 - Launches the Chrome channel by default. Pass `--channel chromium` only when Google Chrome is unavailable and the user accepts Chromium.
-- Run all script commands from the target repo's root so Node resolves that repo's installed `playwright` dependency. Do not use `npx` to fetch a transient Playwright copy; if `playwright` is not installed in the workspace, stop and tell the user rather than installing it silently.
+- Run all script commands from the target repo's root. When resolving Playwright, use this strict order: the target project's installed package, a globally installed package, then `npx playwright`. Only report an error after all three fail. The bundled script performs this lookup automatically.
 - The daemon binds to `127.0.0.1` and requires a bearer token stored in the state file, so the state file path is the only handle agents need. Treat it as an access handle, not durable browser storage: cookies, storage, and tabs are usable while the daemon runs but do not survive a stop or restart.
 - The daemon shuts itself down after 30 minutes without commands (override with `--idle-ms <ms>` on start — consider a longer value if the user may take a while to authenticate). If a command fails because the daemon is gone, check `status`, then restart; the user will need to authenticate again.
 

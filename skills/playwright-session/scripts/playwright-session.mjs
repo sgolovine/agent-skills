@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import fs from "node:fs/promises";
 import fsSync from "node:fs";
@@ -20,7 +20,9 @@ const GLOBAL_COMMANDS = new Set(["newtab", "tabs", "tab", "closetab", "status", 
 
 const scriptPath = fileURLToPath(import.meta.url);
 const workspaceRequire = createRequire(path.join(process.cwd(), "package.json"));
-const { chromium } = workspaceRequire("playwright");
+const scriptRequire = createRequire(import.meta.url);
+let chromium;
+let playwrightPackagePath;
 
 async function main() {
   const [command, ...args] = process.argv.slice(2);
@@ -97,6 +99,7 @@ async function startSession(args) {
       }
     }
 
+    await loadPlaywright();
     await assertChromiumInstalled();
 
     const logFile = path.resolve(sessionDir, "daemon.log");
@@ -124,6 +127,7 @@ async function startSession(args) {
       env: {
         ...process.env,
         BROWSER_SESSION_STATE_FILE: stateFile,
+        PLAYWRIGHT_SESSION_PACKAGE_PATH: playwrightPackagePath,
       },
       stdio: ["ignore", logFd, logFd],
     });
@@ -212,6 +216,7 @@ async function sendBatch(args) {
 }
 
 async function runDaemon(args) {
+  await loadPlaywright();
   const options = parseOptions(args);
   const stateFile = resolveStateFile(options);
   const sessionDir = path.dirname(stateFile);
@@ -811,6 +816,77 @@ function chromiumArgs() {
     args.push("--no-sandbox");
   }
   return args;
+}
+
+async function loadPlaywright() {
+  if (chromium) {
+    return;
+  }
+
+  const inheritedPackagePath = process.argv[2] === "daemon"
+    ? process.env.PLAYWRIGHT_SESSION_PACKAGE_PATH
+    : null;
+  if (inheritedPackagePath) {
+    const playwright = tryRequirePlaywright(inheritedPackagePath);
+    if (playwright) {
+      chromium = playwright.chromium;
+      playwrightPackagePath = inheritedPackagePath;
+      return;
+    }
+  }
+
+  try {
+    const playwright = workspaceRequire("playwright");
+    chromium = playwright.chromium;
+    playwrightPackagePath = workspaceRequire.resolve("playwright");
+    return;
+  } catch {
+    // Try a global installation next.
+  }
+
+  const globalRoots = new Set((process.env.NODE_PATH ?? "").split(path.delimiter).filter(Boolean));
+  const globalRootResult = spawnSync("npm", ["root", "-g"], { encoding: "utf8", timeout: 10_000 });
+  if (globalRootResult.status === 0 && globalRootResult.stdout?.trim()) {
+    globalRoots.add(globalRootResult.stdout.trim());
+  }
+  for (const root of globalRoots) {
+    const packagePath = path.join(root, "playwright");
+    const playwright = tryRequirePlaywright(packagePath);
+    if (playwright) {
+      chromium = playwright.chromium;
+      playwrightPackagePath = packagePath;
+      return;
+    }
+  }
+
+  const locator = process.platform === "win32" ? "where playwright" : "command -v playwright";
+  const npxResult = spawnSync("npx", ["--yes", "--package=playwright", "--call", locator], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    timeout: 120_000,
+  });
+  const executablePath = npxResult.status === 0 ? npxResult.stdout?.trim().split(/\r?\n/)[0] : null;
+  const binDirectory = executablePath ? path.dirname(executablePath) : null;
+  const npxPackagePath = binDirectory && path.basename(binDirectory) === ".bin"
+    ? path.join(path.dirname(binDirectory), "playwright")
+    : null;
+  const npxPlaywright = npxPackagePath ? tryRequirePlaywright(npxPackagePath) : null;
+  if (npxPlaywright) {
+    chromium = npxPlaywright.chromium;
+    playwrightPackagePath = npxPackagePath;
+    return;
+  }
+
+  throw new Error("Unable to load Playwright from the target project, a global installation, or npx playwright.");
+}
+
+function tryRequirePlaywright(packagePath) {
+  try {
+    const playwright = scriptRequire(packagePath);
+    return playwright?.chromium ? playwright : null;
+  } catch {
+    return null;
+  }
 }
 
 async function assertChromiumInstalled() {

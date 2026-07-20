@@ -12,7 +12,7 @@ Run all browser work for a task through one Playwright-controlled Chromium daemo
 - One daemon per run. Never start a second daemon, a separate Playwright process, or a raw Chromium process for the same task.
 - One browser context. Open multiple tabs for parallel work; never create extra contexts or profiles.
 - Headless by default. Pass `--headed` only when the user asks for a visible browser or visual debugging requires one.
-- Run all script commands from the target repo's root so Node resolves that repo's installed `playwright` dependency. Do not use `npx` to fetch a transient Playwright copy; if `playwright` (with Chromium) is not installed in the workspace, stop and tell the user rather than installing it silently.
+- Run all script commands from the target repo's root. When resolving Playwright, use this strict order: the target project's installed package, a globally installed package, then `npx playwright`. Only report an error after all three fail. The bundled script performs this lookup automatically.
 - The daemon binds to `127.0.0.1` and requires a bearer token stored in the state file, so the state file path is the only handle agents need. Treat it as an access handle, not durable browser storage: do not assume cookies, storage, or tabs survive a daemon stop or restart.
 - The daemon shuts itself down after 30 minutes without commands (override with `--idle-ms <ms>` on start). If a command fails because the daemon is gone, check `status`, then restart and re-establish tabs.
 

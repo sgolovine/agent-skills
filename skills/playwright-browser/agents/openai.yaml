@@ -1,0 +1,4 @@
+interface:
+  display_name: "Playwright Browser"
+  short_description: "Run headless or interactive browser sessions"
+  default_prompt: "Use $playwright-browser to run a shared headless browser session; add interactive when I need a visible browser."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Interactive Playwright Session"
-  short_description: "Share one visible Chrome automation session"
-  default_prompt: "Use $interactive-playwright-session to run browser checks through one visible Chrome session that I can interact with for login or setup."

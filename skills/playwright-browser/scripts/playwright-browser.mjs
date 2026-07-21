@@ -12,6 +12,8 @@ import { fileURLToPath } from "node:url";
 const VERSION = "1";
 const DEFAULT_VIEWPORT = { width: 1280, height: 720 };
 const DEFAULT_IDLE_MS = 30 * 60 * 1000;
+const DEFAULT_HEADLESS_BROWSER_CHANNEL = "chromium";
+const DEFAULT_INTERACTIVE_BROWSER_CHANNEL = "chrome";
 const MAX_REQUEST_BYTES = 1024 * 1024;
 const MAX_EVENTS = 200;
 const MAX_BATCH_COMMANDS = 50;
@@ -64,7 +66,7 @@ async function main() {
 function printUsage() {
   const cli = `node ${shellQuote(scriptPath)}`;
   console.log(`Usage:
-  ${cli} start --run-dir <run-dir> [--fresh] [--headed] [--url <url>]
+  ${cli} start --run-dir <run-dir> [--fresh] [--interactive] [--channel <chrome|chromium>] [--url <url>]
   ${cli} status --state-file <session.json>
   ${cli} command --state-file <session.json> <command> [args...]
   ${cli} batch --state-file <session.json> --file <commands.json>
@@ -72,6 +74,7 @@ function printUsage() {
 
 Examples:
   ${cli} start --run-dir agent-tests/2026-06-23--1 --fresh
+  ${cli} start --run-dir agent-tests/2026-06-23--1 --fresh --interactive --url https://app.example.com/login
   ${cli} command --state-file agent-tests/2026-06-23--1/browser-session/session.json newtab http://localhost:8080
   ${cli} command --state-file agent-tests/2026-06-23--1/browser-session/session.json screenshot --tab 1 --path agent-tests/2026-06-23--1/home.png --full-page
 `);
@@ -79,6 +82,7 @@ Examples:
 
 async function startSession(args) {
   const options = parseOptions(args);
+  const interactive = Boolean(options.interactive);
   const stateFile = resolveStateFile(options);
   const sessionDir = path.dirname(stateFile);
   await fs.mkdir(sessionDir, { recursive: true, mode: 0o700 });
@@ -99,8 +103,9 @@ async function startSession(args) {
       }
     }
 
+    const browserChannel = String(options.channel ?? defaultBrowserChannel(interactive));
     await loadPlaywright();
-    await assertChromiumInstalled();
+    await assertBrowserInstalled(browserChannel);
 
     const logFile = path.resolve(sessionDir, "daemon.log");
     const daemonArgs = [
@@ -114,10 +119,12 @@ async function startSession(args) {
       String(options.viewport ?? `${DEFAULT_VIEWPORT.width}x${DEFAULT_VIEWPORT.height}`),
       "--idle-ms",
       String(options["idle-ms"] ?? DEFAULT_IDLE_MS),
+      "--channel",
+      browserChannel,
     ];
 
-    if (options.headed) {
-      daemonArgs.push("--headed");
+    if (interactive) {
+      daemonArgs.push("--interactive");
     }
 
     const logFd = fsSync.openSync(logFile, "a");
@@ -150,6 +157,7 @@ async function startSession(args) {
       port: result.state.port,
       token: result.state.token,
       mode: result.state.mode,
+      browserChannel: result.state.browserChannel,
       command: `node ${shellQuote(scriptPath)} command --state-file ${shellQuote(stateFile)}`,
       stop: `node ${shellQuote(scriptPath)} stop --state-file ${shellQuote(stateFile)}`,
       health: result.health,
@@ -221,13 +229,15 @@ async function runDaemon(args) {
   const stateFile = resolveStateFile(options);
   const sessionDir = path.dirname(stateFile);
   const viewport = parseViewport(options.viewport);
-  const headless = !options.headed;
+  const interactive = Boolean(options.interactive);
+  const headless = !interactive;
+  const browserChannel = String(options.channel ?? defaultBrowserChannel(interactive));
   const token = String(options.token ?? randomBytes(32).toString("hex"));
   const idleMs = Number(options["idle-ms"] ?? DEFAULT_IDLE_MS);
 
   await fs.mkdir(sessionDir, { recursive: true, mode: 0o700 });
 
-  const manager = new BrowserManager({ headless, viewport });
+  const manager = new BrowserManager({ headless, viewport, browserChannel });
   await manager.launch(String(options.url ?? "about:blank"));
 
   const server = http.createServer(async (request, response) => {
@@ -236,7 +246,8 @@ async function runDaemon(args) {
         respondJson(response, 200, {
           ok: true,
           version: VERSION,
-          mode: headless ? "headless" : "headed",
+          mode: interactive ? "interactive" : "headless",
+          browserChannel,
           pid: process.pid,
           uptimeMs: Math.round(process.uptime() * 1000),
           tabCount: manager.tabCount(),
@@ -339,7 +350,8 @@ async function runDaemon(args) {
     port: address.port,
     token,
     startedAt: new Date().toISOString(),
-    mode: headless ? "headless" : "headed",
+    mode: interactive ? "interactive" : "headless",
+    browserChannel,
     version: VERSION,
     stateFile,
     initialUrl: String(options.url ?? "about:blank"),
@@ -347,9 +359,10 @@ async function runDaemon(args) {
 }
 
 class BrowserManager {
-  constructor({ headless, viewport }) {
+  constructor({ headless, viewport, browserChannel }) {
     this.headless = headless;
     this.viewport = viewport;
+    this.browserChannel = browserChannel;
     this.browser = null;
     this.context = null;
     this.pages = new Map();
@@ -364,13 +377,17 @@ class BrowserManager {
   }
 
   async launch(initialUrl) {
-    this.browser = await chromium.launch({
+    const launchOptions = {
       headless: this.headless,
       args: chromiumArgs(),
-    });
+    };
+    if (this.browserChannel !== "chromium") {
+      launchOptions.channel = this.browserChannel;
+    }
+    this.browser = await chromium.launch(launchOptions);
     this.context = await this.browser.newContext({
       viewport: this.headless ? this.viewport : null,
-      deviceScaleFactor: 1,
+      ...(this.headless ? { deviceScaleFactor: 1 } : {}),
     });
     this.context.on("page", (page) => this.registerPage(page));
     await this.newTab(initialUrl);
@@ -887,6 +904,17 @@ function tryRequirePlaywright(packagePath) {
   } catch {
     return null;
   }
+}
+
+async function assertBrowserInstalled(browserChannel) {
+  if (browserChannel !== "chromium") {
+    return;
+  }
+  await assertChromiumInstalled();
+}
+
+function defaultBrowserChannel(interactive) {
+  return interactive ? DEFAULT_INTERACTIVE_BROWSER_CHANNEL : DEFAULT_HEADLESS_BROWSER_CHANNEL;
 }
 
 async function assertChromiumInstalled() {

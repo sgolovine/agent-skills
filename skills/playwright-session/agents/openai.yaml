@@ -1,4 +1,0 @@
-interface:
-  display_name: "Playwright Session"
-  short_description: "Share one Playwright browser session"
-  default_prompt: "Use $playwright-session to run browser checks through one shared Playwright session."

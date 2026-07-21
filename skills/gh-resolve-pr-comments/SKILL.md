@@ -26,13 +26,13 @@ Use the current agent as **Supervisor**. Spawn subagents for worker roles when t
 1. Resolve the GitHub targets. Use the GitHub connector when available, or `gh`/GitHub API commands when that is the local pattern. Gather PR metadata, branch refs, review threads, PR conversation comments, requested changes, prior automated replies, and current resolution state.
 2. Ensure the local checkout matches the target repository. Fetch the PR head branch before analysis. Preserve unrelated local changes; use separate worktrees for concurrent PRs or run PRs serially.
 3. Create a run directory, for example `pr-comment-resolution/<YYYYMMDD-HHMMSS>/`, with per-PR evidence subdirectories.
-4. Read `$playwright-session` from `/home/sgolovine/Projects/agent-skills/skills/playwright-session/SKILL.md`, then start exactly one shared Playwright session from the target repo root after the run directory exists:
+4. Read `$playwright-browser` from `/home/sgolovine/Projects/agent-skills/skills/playwright-browser/SKILL.md`, then start exactly one shared headless Playwright session from the target repo root after the run directory exists:
 
    ```sh
-   PLAYWRIGHT_SESSION_SCRIPT="/home/sgolovine/Projects/agent-skills/skills/playwright-session/scripts/playwright-session.mjs"
-   node "$PLAYWRIGHT_SESSION_SCRIPT" start --run-dir "$RUN_DIR" --fresh --url about:blank
+   PLAYWRIGHT_BROWSER_SCRIPT="/home/sgolovine/Projects/agent-skills/skills/playwright-browser/scripts/playwright-browser.mjs"
+   node "$PLAYWRIGHT_BROWSER_SCRIPT" start --run-dir "$RUN_DIR" --fresh --url about:blank
    BROWSER_SESSION_STATE_FILE="$RUN_DIR/browser-session/session.json"
-   node "$PLAYWRIGHT_SESSION_SCRIPT" status --state-file "$BROWSER_SESSION_STATE_FILE"
+   node "$PLAYWRIGHT_BROWSER_SCRIPT" status --state-file "$BROWSER_SESSION_STATE_FILE"
    ```
 
    If the target repo has no installed `playwright` dependency or a shared session cannot be started, do not install a transient browser dependency with `npx`; record the limitation and continue only with non-browser verification where that is sufficient.

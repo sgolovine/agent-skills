@@ -30,6 +30,7 @@ type Skill = {
 
 type InstallStatus = "conflict" | "installed" | "missing";
 type Action = "install" | "manage";
+type Harness = "codex" | "pi";
 
 type InstallState = {
   status: InstallStatus;
@@ -231,6 +232,33 @@ const action = handleCancel(
   }),
 );
 
+const harness = handleCancel(
+  await select<Harness>({
+    message: "Which coding harness do you want to install skills for?",
+    options: [
+      {
+        value: "codex",
+        label: "Codex CLI",
+      },
+      {
+        value: "pi",
+        label: "Pi",
+      },
+    ],
+  }),
+);
+
+const harnessPaths = {
+  codex: {
+    global: [".codex", "skills"],
+    project: [".codex", "skills"],
+  },
+  pi: {
+    global: [".pi", "agent", "skills"],
+    project: [".pi", "skills"],
+  },
+} satisfies Record<Harness, Record<"global" | "project", string[]>>;
+
 const installScope = handleCancel(
   await select<"global" | "project">({
     message: "Which skill context do you want to use?",
@@ -238,18 +266,18 @@ const installScope = handleCancel(
       {
         value: "global",
         label: "Globally",
-        hint: path.join(os.homedir(), ".codex", "skills"),
+        hint: path.join(os.homedir(), ...harnessPaths[harness].global),
       },
       {
         value: "project",
         label: "Inside a project folder",
-        hint: "<project>/.codex/skills",
+        hint: path.join("<project>", ...harnessPaths[harness].project),
       },
     ],
   }),
 );
 
-let targetDir = path.join(os.homedir(), ".codex", "skills");
+let targetDir = path.join(os.homedir(), ...harnessPaths[harness].global);
 
 if (installScope === "project") {
   const projectPath = handleCancel(
@@ -266,7 +294,10 @@ if (installScope === "project") {
     }),
   );
 
-  targetDir = path.join(path.resolve(expandHome(projectPath)), ".codex", "skills");
+  targetDir = path.join(
+    path.resolve(expandHome(projectPath)),
+    ...harnessPaths[harness].project,
+  );
 }
 
 const installStates = new Map<string, InstallState>();

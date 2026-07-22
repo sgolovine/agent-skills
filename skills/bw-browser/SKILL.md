@@ -1,6 +1,6 @@
 ---
 name: bw-browser
-description: Operate the BetterWright persistent headless browser for live web tasks such as navigation, authentication, form submission, booking, purchasing, and interacting with pages that require a real browser.
+description: Operate the BetterWright persistent headed browser with the Playwright API for live web tasks such as navigation, authentication, form submission, booking, purchasing, and interacting with pages that require a real browser.
 ---
 
 # Browser tool: BetterWright
@@ -9,10 +9,19 @@ You can operate a real, persistent web browser by running the `betterwright`
 command. Use it whenever a task needs the live web — logging in, filling forms,
 booking, buying, or reading a page an API will not give you.
 
+BetterWright runs headed by default for this skill. Pass `--headed` on every
+`run` and `repl` command so the browser is visible while that command remains
+active. Use headless mode only when the user explicitly requests it; in that
+case, omit `--headed` for the whole session.
+
+Browser code uses the same async Playwright API (`page`, locators, and browser
+events), with BetterWright helpers such as `snapshot`, `human`, and `credentials`
+available in addition.
+
 Single action — pass async Playwright JavaScript; a trailing expression (or an
 explicit `return`) is the result:
 
-    betterwright run -c "await page.goto('https://example.com'); return page.title()"
+    betterwright run --headed -c "/* note: Opening the example page. */ await page.goto('https://example.com'); return page.title()"
 
 The command prints one JSON object:
 {ok, result, error, console, events, artifacts, pages, challenges, warnings, durationMs}.
@@ -22,10 +31,64 @@ The command prints one JSON object:
 Multi-step task — pipe blank-line-separated snippets into one long-lived session
 so open tabs and in-memory `state` persist between steps:
 
-    printf '%s\n\n%s\n' "await page.goto('https://site.example')" "return page.title()" | betterwright repl
+    printf '%s\n\n%s\n' "/* note: Opening the site. */ await page.goto('https://site.example')" "/* note: Reading the page title. */ return page.title()" | betterwright repl --headed
 
 Logins and cookies persist across every invocation through the on-disk profile;
-open tabs and `state` persist only within a single `repl` session.
+open tabs and `state` persist only within a single `repl` session. When a `run`
+command or REPL exits, its browser closes. A new invocation starts on a new page
+and cannot inspect or control a page owned by another invocation.
+
+The CLI does not expose a `note` flag or global `note()` function. Start every
+CLI snippet with a short, present-tense JavaScript comment such as
+`/* note: Opening the sign-in page. */`; do not call `note(...)`. When an
+integration exposes a real `note` field, use that field instead.
+
+## Leaving a headed browser open for the user
+
+A one-shot `betterwright run --headed` is not a handoff session: the browser
+closes when the command exits. For manual login, MFA, CAPTCHA, or visual
+inspection, keep one headed REPL and its stdin alive. BetterWright currently has
+no CLI command to detach, name, list, or resume REPL sessions, so use a private
+FIFO and record the owning PID and log path:
+
+    handoff_dir=$(mktemp -d /tmp/betterwright-handoff.XXXXXX)
+    mkfifo "$handoff_dir/commands"
+    nohup sh -c '
+      exec 3<>"$1/commands"
+      exec betterwright repl --headed <&3
+    ' sh "$handoff_dir" >"$handoff_dir/session.log" 2>&1 &
+    echo $! >"$handoff_dir/pid"
+    printf 'BetterWright handoff: %s\n' "$handoff_dir"
+
+Record the printed directory. In every later shell call, set `handoff_dir` to
+that exact path before writing to the FIFO, reading the log, or cleaning up.
+Send the navigation and readiness check to that REPL. End each snippet with a
+blank line:
+
+    printf '%s\n\n' '/* note: Opening the sign-in page for the user. */
+    await page.goto("http://localhost:3000");
+    await page.waitForURL(/\/login(?:\?|$)/);
+    await page.getByRole("button", { name: "Continue with BQE" }).waitFor();
+    return { url: page.url(), view: await snapshot({ interactive: true }), shot: await screenshot({ kind: "question" }) };' >"$handoff_dir/commands"
+
+Inspect `"$handoff_dir/session.log"` and the returned question screenshot before
+telling the user the page is ready. For client-rendered authentication gates,
+do not hand off on a loading state such as "Checking session..."; wait for a
+task-relevant URL or exact locator. Prefer those conditions over a fixed delay.
+
+Send follow-up snippets through the same FIFO. Do not use another `run` or REPL
+to inspect the handoff page: it creates a separate page and process. While the
+handoff owns the persistent profile, concurrent BetterWright invocations may
+fall back to an isolated temporary profile without saved logins.
+
+After the user finishes, verify success and take any proof screenshot through
+the same FIFO. Then close only the recorded handoff process and remove its files:
+
+    kill "$(cat "$handoff_dir/pid")"
+    rm -rf "$handoff_dir"
+
+Killing that REPL closes its visible browser. Never use a broad `pkill`, which
+could terminate unrelated BetterWright work.
 
 When a result lists `skills`, deeper site or provider knowledge matches the
 open pages — read the named pack with `betterwright skills show <name>` before
@@ -37,7 +100,9 @@ by default; add `--block-private-network` / `--block-loopback` to lock down, or
 `--allow-host <host>` / `--block-host <host>` to adjust. Cloud-metadata endpoints
 are always blocked.
 
-Below, "`run()`" means "one `betterwright run` (or `repl`) snippet".
+Below, "`run()`" means "one headed `betterwright run --headed` (or
+`betterwright repl --headed`) snippet", unless the user explicitly requested
+headless mode.
 
 # Operating the browser
 
@@ -64,8 +129,10 @@ them, or add confirmation unless a guardrail below requires it.
   accepted state — recheck only on a concrete contradiction. Batch action and
   verification in one `run()` when the next step needs no fresh ref; split
   when it does.
-- Actions auto-wait — add no sleeps after navigation or clicks. If an action
-  fails, re-snapshot before retrying; an "obscured" click means inspect the
+- Actions auto-wait — add no sleeps after navigation or clicks. Before a human
+  handoff, explicitly wait for the task-relevant URL or locator; use a fixed
+  delay only when no stable condition exists. If an action fails, re-snapshot
+  before retrying; an "obscured" click means inspect the
   real hit target; the same path failing twice means switch approach.
   Unexpected state usually means a missed, stale, or wrong-target action —
   suspect that before inferring site-specific rules.
@@ -77,7 +144,8 @@ them, or add confirmation unless a guardrail below requires it.
   `human.click(target)`, `human.type(target, text)`, and
   `human.scroll(deltaY)` for visible actions; use Locator methods when their
   exact semantics matter.
-- Put a short present-tense `note` on every call.
+- Describe every call with a short present-tense note: use the integration's
+  `note` field when available, or the documented leading comment in CLI snippets.
 - For broad discovery, use the host's search tool; do not automate Google or
   Bing's public search UI. Without search, navigate to likely first-party
   sites; never fabricate deep URLs.

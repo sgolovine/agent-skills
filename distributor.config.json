@@ -1,0 +1,5 @@
+{
+  "scope": "global",
+  "source": "skills/",
+  "harnesses": ["claude-code", "opencode", "pi"]
+}

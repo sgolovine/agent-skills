@@ -1,0 +1,4 @@
+interface:
+  display_name: "Herdr"
+  short_description: "Control Herdr terminal sessions and coding agents"
+  default_prompt: "Use $herdr to inspect or control this Herdr session."

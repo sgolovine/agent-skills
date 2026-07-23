@@ -1,6 +1,6 @@
 # Theming
 
-Retheme reports through CSS custom properties. Keep component markup stable and change tokens first. The default theme is a grayscale printed form; preserve its square geometry, border hierarchy, compact type, and shared edges even when adjusting colors.
+Retheme reports through CSS custom properties. Keep component markup stable and change tokens first. The default theme is a high-contrast printed form with one punchy accent; preserve its square geometry, border hierarchy, compact type, and shared edges when adjusting colors.
 
 ## Token Groups
 
@@ -8,23 +8,36 @@ Edit these variables in `assets/report-kit/report.css` or override them in the f
 
 | Token Group | Variables |
 | --- | --- |
-| Palette | `--report-ink`, `--report-muted`, `--report-bg`, `--report-surface`, `--report-border`, `--report-shade`, `--report-white` |
+| Palette | `--report-ink`, `--report-muted`, `--report-bg`, `--report-surface`, `--report-border`, `--report-shade`, `--report-white`, `--report-accent`, `--report-accent-ink` |
 | Rules | `--report-outer-rule`, `--report-header-rule`, `--report-inner-rule` |
 | Layout | `--report-max-width`, `--report-density` |
 
+## Color Budget
+
+- Use one punchy accent to distinguish section headers, headings, callout rules, and selected chart marks.
+- Use no more than four distinct colors on a page, including neutral text, paper, background fills, and the accent. Alias multiple tokens to the same value instead of adding subtle extra shades.
+- If dense data genuinely needs more than four colors, ask the user for an exception before adding them. Without an exception, distinguish series with labels, patterns, borders, or line styles.
+- Keep text contrast at WCAG AA or better and never use color as the only status or data cue.
+
 ## Theme Pattern
 
-Use a scoped class when one document needs multiple looks or when preserving the base kit. Keep the example neutral and grayscale:
+Use a scoped class when one document needs multiple looks or when preserving the base kit. This example retains the four-color budget:
 
 ```css
-.report-theme-soft-gray {
-  --report-bg: #eeeeee;
-  --report-shade: #d9d9d9;
-  --report-muted: #444444;
+.report-theme-orange {
+  --report-ink: #202020;
+  --report-muted: #202020;
+  --report-bg: #ece8e1;
+  --report-shade: #ece8e1;
+  --report-surface: #ffffff;
+  --report-white: #ffffff;
+  --report-accent-ink: #ffffff;
+  --report-border: #202020;
+  --report-accent: #b93800;
 }
 ```
 
-Apply it to `<body class="report-theme-soft-gray">` or a wrapper.
+Apply it to `<body class="report-theme-orange">` or a wrapper.
 
 ## Density
 

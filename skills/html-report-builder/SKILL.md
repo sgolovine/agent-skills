@@ -1,13 +1,13 @@
 ---
 name: html-report-builder
-description: Build standalone HTML reports from reusable, themeable components in a compact grayscale printed-form style. Use when Codex needs to create, assemble, style, or improve an HTML report, static dashboard report, executive summary, analysis page, data table report, printable report, or report with headings, subheadings, tables, metrics, callouts, and basic charts.
+description: Build standalone HTML reports from reusable, themeable components in a compact, high-contrast printed-form style with restrained accent color. Use when Codex needs to create, assemble, style, or improve an HTML report, static dashboard report, executive summary, analysis page, data table report, printable report, or report with headings, subheadings, tables, metrics, callouts, and basic charts.
 ---
 
 # HTML Report Builder
 
 ## Operating Principle
 
-Assemble reports from the component kit, then adapt the content, hierarchy, and data to the user's source material while preserving the kit's compact printed-form visual system.
+Assemble reports from the component kit, then adapt the content, hierarchy, and data to the user's source material while preserving the kit's compact printed-form visual system and restrained, punchy color contrast.
 
 ## Workflow
 
@@ -20,10 +20,11 @@ Assemble reports from the component kit, then adapt the content, hierarchy, and 
    - `references/data-display.md` for tables, metrics, and basic chart choices.
    - `references/theming.md` for CSS variables, theming, responsive behavior, and print styling.
    - `references/printed-form-style-reference.md` when creating or changing theme, styling, density, component shape, or visual treatment.
-6. Keep the default style stark, grayscale, square, dense, and print-oriented. Transfer only visual rules from any style reference; never copy its subject matter, wording, labels, examples, or domain-specific class names into a report.
-7. Prefer static, dependency-free charts from the kit for simple comparisons, distributions, trends, and proportions. Use a charting library only when the user needs interaction, precise axes, large datasets, or chart types outside the kit.
-8. Theme by editing CSS custom properties in `:root` or adding a scoped theme class. Preserve the strong rules, square geometry, compact type scale, and shared-edge layout unless the user explicitly requests a different style.
-9. Before finishing, verify the HTML renders cleanly in a browser when feasible. Check desktop and mobile widths, print styles for printable reports, table overflow, chart labels, contrast, and that no text overlaps or clips. Confirm the report contains only the user's content and generic kit placeholders, never content from a style reference, and that the final artifact's filename ends with `.report.html`.
+6. Keep the default style stark, square, dense, and print-oriented, but use one punchy accent color to make section boundaries, headings, and high-signal elements easy to scan. Transfer only visual rules from any style reference; never copy its subject matter, wording, labels, examples, or domain-specific class names into a report.
+7. Use no more than four distinct colors on a page, counting neutral text, backgrounds, and accents. Reuse tokens instead of introducing near-duplicate shades. If dense data genuinely needs more than four colors, ask the user for an exception before exceeding the limit; otherwise use labels, patterns, borders, or line styles to distinguish series.
+8. Prefer static, dependency-free charts from the kit for simple comparisons, distributions, trends, and proportions. Use a charting library only when the user needs interaction, precise axes, large datasets, or chart types outside the kit.
+9. Theme by editing CSS custom properties in `:root` or adding a scoped theme class. Preserve the strong rules, square geometry, compact type scale, shared-edge layout, and restrained accent hierarchy unless the user explicitly requests a different style.
+10. Before finishing, verify the HTML renders cleanly in a browser when feasible. Check desktop and mobile widths, print styles for printable reports, table overflow, chart labels, accessible text contrast, the four-color budget, and that no text overlaps or clips. Confirm the report contains only the user's content and generic kit placeholders, never content from a style reference, and that the final artifact's filename ends with `.report.html`.
 
 ## Resource Map
 
@@ -33,7 +34,7 @@ Assemble reports from the component kit, then adapt the content, hierarchy, and 
 | `references/report-composition.md` | Report outlines, heading rules, page structure, and accessibility checks. |
 | `references/data-display.md` | Guidance for tables, metric cards, CSS charts, SVG sparklines, and chart fallbacks. |
 | `references/theming.md` | CSS variables, theme scopes, print behavior, and responsive rules. |
-| `references/printed-form-style-reference.md` | Default visual rules for grayscale palette, square components, strong borders, compact typography, shared edges, and print density. |
+| `references/printed-form-style-reference.md` | Default visual rules for a restrained high-contrast palette, square components, strong borders, compact typography, shared edges, and print density. |
 | `assets/report-kit/report-template.html` | Starter report shell with linked CSS and example sections. |
 | `assets/report-kit/report.css` | Themeable CSS tokens and component styles. |
 | `assets/report-kit/components.html` | Canonical component markup. Copy snippets from this file by `data-component`. |
@@ -45,5 +46,7 @@ Assemble reports from the component kit, then adapt the content, hierarchy, and 
 - Keep the first viewport useful: title, context, date or scope, and key takeaways.
 - Put raw data in tables when exact values matter; add chart summaries for visual scanning.
 - Keep CSS variables near the top of the file so downstream agents can retheme quickly.
+- Use a punchy accent for scanability, while keeping the page to four distinct colors unless the user approves an exception for dense data.
+- Do not rely on color alone to communicate status or meaning; retain labels, values, and structural cues.
 - Use uppercase styling through CSS rather than rewriting source content in uppercase.
 - For standalone delivery, inline or copy the CSS into the final artifact when external asset paths would break.

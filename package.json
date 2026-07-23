@@ -8,6 +8,8 @@
   },
   "scripts": {
     "install:skills": "tsx scripts/install-agent-skills.ts",
+    "site:dev": "pnpm --filter website dev",
+    "site:build": "pnpm --filter website build",
     "tsc": "tsc --noEmit"
   },
   "author": "Sunny Golovine",

@@ -17,7 +17,7 @@ This file is the report kit directory and the single source of truth for what co
 | `references/report-composition.md` | Choosing a report structure, section order, heading hierarchy, or accessibility checks. |
 | `references/data-display.md` | Choosing tables, metrics, chart types, chart fallbacks, or data formatting. |
 | `references/theming.md` | Retheming, changing density, making print-ready output, or adapting responsiveness. |
-| `references/printed-form-style-reference.md` | Creating or changing the grayscale printed-form visual style, density, borders, or component shape. |
+| `references/printed-form-style-reference.md` | Creating or changing the high-contrast printed-form visual style, accent palette, density, borders, or component shape. |
 
 ## Component Catalog
 

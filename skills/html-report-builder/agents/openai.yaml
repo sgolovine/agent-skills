@@ -1,4 +1,4 @@
 interface:
   display_name: "HTML Report Builder"
   short_description: "Build compact printed-form HTML reports"
-  default_prompt: "Use $html-report-builder to create a compact grayscale HTML report from the reusable component kit."
+  default_prompt: "Use $html-report-builder to create a compact, high-contrast HTML report with restrained accent color from the reusable component kit."

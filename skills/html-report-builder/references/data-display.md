@@ -38,7 +38,7 @@ The kit supports static chart components without JavaScript.
 
 - Store chart values in visible text as well as visual attributes.
 - For `bar-chart`, set `--value` to a percentage width and keep the label value visible.
-- For `stacked-bar`, ensure segment widths add to `100%` and use distinguishable grayscale fills or patterns.
+- For `stacked-bar`, ensure segment widths add to `100%` and use the existing accent and neutral tokens plus labels, borders, or patterns. Do not exceed the report's four-color budget without asking the user for an exception for dense data.
 - For `sparkline-panel`, update the SVG `polyline` points and the adjacent summary text.
 - For `donut-progress`, set `--percent` to a percent value and update the center label.
 

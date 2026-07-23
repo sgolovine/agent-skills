@@ -1,12 +1,14 @@
 :root {
   color-scheme: light;
-  --report-ink: #000000;
-  --report-muted: #333333;
-  --report-bg: #d8d8d8;
+  --report-ink: #172033;
+  --report-muted: #172033;
+  --report-bg: #e7ecf2;
   --report-surface: #ffffff;
-  --report-border: #000000;
-  --report-shade: #e6e6e6;
+  --report-border: #172033;
+  --report-shade: #e7ecf2;
   --report-white: #ffffff;
+  --report-accent: #0057b8;
+  --report-accent-ink: #ffffff;
   --report-max-width: 900px;
   --report-outer-rule: 2px;
   --report-header-rule: 1.5px;
@@ -33,7 +35,7 @@ body {
 }
 
 a {
-  color: inherit;
+  color: var(--report-accent);
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
@@ -63,13 +65,14 @@ a {
   min-width: 78px;
   padding: calc(8px * var(--report-density)) 12px;
   border-right: var(--report-outer-rule) solid var(--report-border);
+  color: var(--report-accent-ink);
   text-align: center;
-  background: var(--report-shade);
+  background: var(--report-accent);
 }
 
 .report-code .label {
   display: block;
-  color: var(--report-muted);
+  color: var(--report-accent-ink);
   font-size: 0.62rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -97,7 +100,7 @@ a {
 .metric-label,
 .table-caption,
 .timeline-date {
-  color: var(--report-muted);
+  color: var(--report-accent);
   font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -191,11 +194,12 @@ h1 {
   margin: 0;
   padding: calc(5px * var(--report-density)) 10px;
   border-bottom: var(--report-header-rule) solid var(--report-border);
-  background: var(--report-shade);
+  color: var(--report-accent-ink);
+  background: var(--report-accent);
 }
 
 .section-kicker {
-  color: var(--report-ink);
+  color: var(--report-accent-ink);
   font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0;
@@ -203,7 +207,7 @@ h1 {
 
 h2 {
   margin: 0;
-  color: var(--report-ink);
+  color: var(--report-accent-ink);
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -234,6 +238,7 @@ h2 {
 
 h3 {
   margin-bottom: 3px;
+  color: var(--report-accent);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -318,7 +323,8 @@ h3 {
 
 .metric-delta.positive,
 .status-label.good {
-  background: var(--report-surface);
+  color: var(--report-accent-ink);
+  background: var(--report-accent);
 }
 
 .metric-delta.neutral,
@@ -334,7 +340,7 @@ h3 {
 
 .callout {
   padding: calc(10px * var(--report-density));
-  border-left: 6px solid var(--report-border);
+  border-left: 6px solid var(--report-accent);
   background: var(--report-shade);
 }
 
@@ -375,7 +381,7 @@ td {
 }
 
 thead th {
-  color: var(--report-ink);
+  color: var(--report-accent);
   background: var(--report-surface);
   border-bottom: var(--report-header-rule) solid var(--report-border);
   font-size: 0.66rem;
@@ -438,7 +444,7 @@ tbody tr:last-child > td {
   display: block;
   width: var(--value, 0%);
   height: 100%;
-  background: var(--report-ink);
+  background: var(--report-accent);
 }
 
 .stacked-bar {
@@ -486,7 +492,7 @@ tbody tr:last-child > td {
 
 .sparkline polyline {
   fill: none;
-  stroke: var(--report-ink);
+  stroke: var(--report-accent);
   stroke-linecap: square;
   stroke-linejoin: miter;
   stroke-width: 3;
@@ -505,7 +511,7 @@ tbody tr:last-child > td {
   place-items: center;
   border: var(--report-inner-rule) solid var(--report-border);
   border-radius: 50%;
-  background: conic-gradient(var(--report-ink) var(--percent), var(--report-shade) 0);
+  background: conic-gradient(var(--report-accent) var(--percent), var(--report-shade) 0);
 }
 
 .donut-center {

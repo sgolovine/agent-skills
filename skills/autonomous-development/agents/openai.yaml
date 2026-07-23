@@ -1,4 +1,4 @@
 interface:
   display_name: "Autonomous Development"
-  short_description: "Plan, implement, test, and open draft PRs"
-  default_prompt: "Use $autonomous-development to build this feature from baseline through a draft PR."
+  short_description: "Develop in isolated worktrees with regular pushes"
+  default_prompt: "Use $autonomous-development to build this feature in a new branch and linked worktree, publish coherent checkpoints, validate it, and open a draft PR."

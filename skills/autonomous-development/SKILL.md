@@ -1,13 +1,13 @@
 ---
 name: autonomous-development
-description: "Run an end-to-end autonomous feature development workflow in a code repository: establish a clean git baseline from the correct base branch, create a plan with validation criteria, implement the plan, test the code, commit the work, push a branch, and open a draft pull request. Use when the user hands Codex a feature, bug fix, refactor, or repository change request and wants Codex to carry it through to a PR."
+description: "Run an end-to-end autonomous feature development workflow in a code repository: create an isolated task branch and linked worktree from the correct base, plan and implement the change, commit and push coherent checkpoints throughout development, validate the result, and open a draft pull request. Use when the user hands Codex a feature, bug fix, refactor, or repository change request and wants Codex to carry it through to a PR."
 ---
 
 # Autonomous Development
 
 ## Operating Principle
 
-Move like a careful project maintainer: preserve unrelated work, make the intended parent explicit, plan before editing, verify with the repo's own checks, and open a draft PR only when the implementation and evidence are coherent.
+Move like a careful project maintainer: isolate every task in a new branch and linked worktree, preserve unrelated work, make the intended parent explicit, plan before editing, checkpoint coherent progress with conventional commits and pushes, verify with the repo's own checks, and open a draft PR only when the implementation and evidence are coherent.
 
 ## Inputs
 
@@ -23,12 +23,18 @@ Infer the target repository from the current working directory. If no git reposi
    - When the user does not name the parent, use the remote default branch when it is one of those three; resolve an unset `origin/HEAD` with `git remote show origin`.
    - If the remote default is unavailable or has another name, use an existing branch in this order: `main`, `master`, then `develop`.
    - If none exists, stop and ask which supported parent branch to create or use. Do not base autonomous development on any other branch.
-3. Preserve unrelated local work:
-   - If the working tree has uncommitted changes before starting, inspect enough to decide whether they are relevant.
-   - Do not overwrite, revert, stash, or commit pre-existing user changes without explicit intent.
-   - If unrelated changes would block baseline setup, create a separate worktree or ask for direction.
-4. Fetch remotes with pruning, then create a new task branch from the selected parent before making changes, for example `git switch -c codex/<short-kebab-summary> --no-track origin/<parent>`. Never develop directly on `main`, `master`, or `develop`. Do not switch to or fast-forward the local parent branch; the workflow does not need it, and it may hold user state. If the parent has no remote ref, branch from the local parent and note that push and PR steps may be blocked.
-5. Use `codex/<short-kebab-summary>` as the branch name unless the user requests another name. Avoid reusing an existing branch unless it is clearly the active task branch.
+3. Preserve unrelated local work. Do not overwrite, revert, stash, or commit pre-existing user changes. Baseline inspection happens in the original checkout; all task work happens in the new linked worktree, so a dirty original checkout does not need to be cleaned.
+4. Fetch remotes with pruning. Choose `origin/<parent>` as the start point when available; otherwise use the local parent and note that push and PR steps may be blocked.
+5. Before planning or editing, create both a new task branch and a new linked worktree from that start point. This is mandatory for every task, even when the original checkout is clean. For example:
+   ```bash
+   branch="codex/<short-kebab-summary>"
+   worktree="../<repo>-worktrees/<short-kebab-summary>"
+   mkdir -p "$(dirname "$worktree")"
+   git worktree add -b "$branch" "$worktree" "origin/<parent>"
+   ```
+   Use a sibling worktree location outside the repository so it does not appear as project content. Do not switch or fast-forward the parent branch in the original checkout.
+6. Confirm the new worktree is on the task branch and clean with `git -C "$worktree" status --short --branch`. Run every subsequent repository read, edit, build, test, commit, push, and PR command from that worktree.
+7. Use `codex/<short-kebab-summary>` unless the user requests another branch name. Use a unique worktree path. If either the branch or path already exists, do not silently reuse or delete it; choose a unique task name or stop for direction. Never develop directly on `main`, `master`, or `develop`.
 
 ## Plan
 
@@ -51,6 +57,12 @@ If the plan reveals a material gap, ask before implementation. Otherwise proceed
 4. Update or add tests near the changed behavior. When tests are not practical, explain why and use the strongest available validation.
 5. Update documentation, examples, migrations, or configuration only when required by the changed behavior.
 6. Review the diff while working to catch accidental edits, generated noise, secret material, or unrelated changes.
+7. Create and publish checkpoints throughout development:
+   - Commit after each coherent milestone, such as a schema or API change, the core implementation, tests, or documentation. For a small atomic task, one implementation commit is sufficient.
+   - Before each checkpoint, run the fastest relevant targeted check and inspect the staged diff. Keep each commit focused and leave the branch in a usable state when practical.
+   - Follow the repository's documented or recent commit convention. If none is clear, use Conventional Commits 1.0.0 (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`, and similar).
+   - Push immediately after the first commit with `git push -u origin <branch>`, then push again after every later commit. Do not wait until the end of a multi-milestone task to publish all progress.
+   - Do not use meaningless checkpoint messages such as `WIP`, and do not amend, squash, rebase, or force-push already published checkpoints unless the user explicitly asks.
 
 ## Validation
 
@@ -65,15 +77,14 @@ Run the repo's relevant checks before opening the PR. Prefer discovered project 
 
 If a check fails, fix the cause and rerun the relevant check. If a check cannot be run because of missing credentials, services, packages, time, or environment constraints, record the exact command, failure, and residual risk in the PR.
 
-Before committing, review `git status --short` and the full diff, then the staged diff after staging.
+Before each commit, review `git status --short` and the relevant diff, then the staged diff after staging. Run the complete relevant validation suite before the final push and PR.
 
-## Commit And PR
+## Finalize And Open PR
 
-1. Stage only files that belong to the task.
-2. Commit the implementation with a focused message that follows the repository's convention. If no convention is discoverable, use Conventional Commits.
-3. Push the task branch with an upstream: `git push -u origin <branch>`.
-4. Open a draft pull request by default with `gh pr create --draft --base <parent>`, where `<parent>` is the parent branch established earlier. Use a ready-for-review PR only when the user explicitly requests it. If `gh` is unavailable or unauthenticated, leave the branch pushed and report the compare URL as the blocker instead of retrying other tooling.
-5. Write the PR body with:
+1. Stage only files that belong to the task. If validation or review produced final changes, commit them with the same checkpoint rules; do not leave task changes uncommitted.
+2. Confirm every commit has been pushed and the local task branch is synchronized with its upstream.
+3. Open a draft pull request by default with `gh pr create --draft --base <parent>`, where `<parent>` is the parent branch established earlier. Use a ready-for-review PR only when the user explicitly requests it. If `gh` is unavailable or unauthenticated, leave the branch pushed and report the compare URL as the blocker instead of retrying other tooling.
+4. Write the PR body with:
    - summary of the user-facing or developer-facing change,
    - implementation notes that matter for review,
    - validation commands and outcomes,
@@ -84,4 +95,4 @@ Do not merge the PR, mark it ready, request reviewers, or modify remote reposito
 
 ## Completion Criteria
 
-Finish only after reporting the branch, PR URL, validation performed, and any skipped checks or unresolved risks. If opening a PR is blocked, still leave the branch and commits in a reviewable state and report the exact blocker.
+Finish only after reporting the branch, linked worktree path, pushed commits, PR URL, validation performed, and any skipped checks or unresolved risks. Leave the linked worktree in place for review or follow-up unless the user explicitly asks to remove it. If pushing or opening a PR is blocked, keep the branch and commits reviewable and report the exact blocker.

@@ -1,6 +1,6 @@
 # Pull Request Review Checklist
 
-Use this checklist selectively. A category is a search lens, not a reason to manufacture a finding.
+Use this checklist selectively, applying only the search lenses relevant to the changed behavior.
 
 ## Finding Admission Test
 
@@ -9,7 +9,7 @@ Keep a candidate only when all are true:
 1. **Introduced:** The PR creates or materially worsens it.
 2. **Specific:** A concrete input, state, environment, or sequence triggers it.
 3. **Demonstrable:** Code flow, a focused check, documentation, or a test supports the claim.
-4. **Material:** It affects required behavior, users, data, security, operations, performance, or long-term supportability.
+4. **Material:** It affects required behavior, users, data, security, operations, performance, or compatibility.
 5. **Actionable:** The author can address it within the PR or deliberately defer it.
 6. **Locatable:** The finding can cite the changed line most responsible for the behavior.
 
@@ -69,12 +69,3 @@ Reject pre-existing defects, broad hypothetical concerns without a plausible tri
 - Mocks preserve the relevant production semantics rather than hiding integration failures.
 - Snapshots and generated outputs were intentionally updated and reviewed.
 - CI failures, skipped jobs, flaky checks, and platform gaps are distinguished from verified regressions.
-
-## Severity Calibration
-
-Use the lowest priority that accurately reflects demonstrated impact:
-
-- **P0:** Catastrophic and broadly triggered, such as severe compromise, unrecoverable data loss, or a universally broken release path.
-- **P1:** Likely production failure or serious security, data, compatibility, or core-workflow defect.
-- **P2:** Defect under narrower conditions, affecting a secondary workflow, or with a practical workaround.
-- **P3:** Concrete low-impact issue. Never use P3 as a container for taste, formatting, or optional refactoring.

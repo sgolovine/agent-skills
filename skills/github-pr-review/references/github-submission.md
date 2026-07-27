@@ -1,15 +1,15 @@
 # GitHub Review Submission
 
-The authorization boundary in `../SKILL.md` applies. Use one reviewed revision and one submission mechanism per review.
+A concrete PR review is submitted by default under the authorization boundary in `../SKILL.md`; skip submission only when the user opts out. Use one reviewed revision and one submission mechanism per review.
 
 ## Pre-Submission Gate
 
 1. Query `baseRefOid` and `headRefOid` again immediately before writing.
 2. If the head OID differs from the reviewed head, stop without submitting and review the new head. If the base OID changed, recompute the merge base and refresh any affected coverage, findings, and CI claims first.
 3. Choose the review event:
-   - `COMMENT` for non-blocking feedback or when material coverage or verification is incomplete.
+   - `COMMENT` by default, including for non-blocking feedback, no-findings results, or incomplete material coverage or verification.
    - `REQUEST_CHANGES` only for a verified blocking finding.
-   - `APPROVE` only when the user requested that decision, the reviewed head is current, all material files were covered, and no unresolved high-risk intent, CI, or validation gap remains.
+   - `APPROVE` only when the user explicitly requested that decision, the reviewed head is current, all material files were covered, and no unresolved high-risk intent, CI, or validation gap remains.
 
 ## Summary-Only Review
 
@@ -52,4 +52,4 @@ gh api --hostname "$HOST" --method POST \
   --input "$REVIEW_PAYLOAD"
 ```
 
-Do not also run `gh pr review` for the same review. If a finding cannot be anchored, keep its `path:line` location in the top-level body. If GitHub rejects an anchor or reports a stale commit, stop and revalidate instead of retrying against a different revision.
+Do not also run `gh pr review` for the same review. If a finding cannot be anchored, keep its `path:line` location in the top-level body. If GitHub rejects an anchor or reports a stale commit, stop and revalidate instead of retrying against a different revision. After submission, capture the created review URL when available and report it to the user; otherwise report the review ID and canonical PR URL.

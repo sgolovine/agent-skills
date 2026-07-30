@@ -23,18 +23,14 @@ Infer the target repository from the current working directory. If no git reposi
    - When the user does not name the parent, use the remote default branch when it is one of those three; resolve an unset `origin/HEAD` with `git remote show origin`.
    - If the remote default is unavailable or has another name, use an existing branch in this order: `main`, `master`, then `develop`.
    - If none exists, stop and ask which supported parent branch to create or use. Do not base autonomous development on any other branch.
-3. Preserve unrelated local work. Do not overwrite, revert, stash, or commit pre-existing user changes. Baseline inspection happens in the original checkout; all task work happens in the new linked worktree, so a dirty original checkout does not need to be cleaned.
+3. Preserve unrelated local work. Do not overwrite, revert, stash, or commit pre-existing user changes. A dirty original checkout does not need to be cleaned.
 4. Fetch remotes with pruning. Choose `origin/<parent>` as the start point when available; otherwise use the local parent and note that push and PR steps may be blocked.
-5. Before planning or editing, create both a new task branch and a new linked worktree from that start point. This is mandatory for every task, even when the original checkout is clean. For example:
-   ```bash
-   branch="codex/<short-kebab-summary>"
-   worktree="../<repo>-worktrees/<short-kebab-summary>"
-   mkdir -p "$(dirname "$worktree")"
-   git worktree add -b "$branch" "$worktree" "origin/<parent>"
-   ```
-   Use a sibling worktree location outside the repository so it does not appear as project content. Do not switch or fast-forward the parent branch in the original checkout.
-6. Confirm the new worktree is on the task branch and clean with `git -C "$worktree" status --short --branch`. Run every subsequent repository read, edit, build, test, commit, push, and PR command from that worktree.
-7. Use `codex/<short-kebab-summary>` unless the user requests another branch name. Use a unique worktree path. If either the branch or path already exists, do not silently reuse or delete it; choose a unique task name or stop for direction. Never develop directly on `main`, `master`, or `develop`.
+5. Read [the shared linked worktree contract](../../references/worktrees.md), then apply it before planning or editing, even when the original checkout is clean. Use:
+   - the original checkout as the control checkout,
+   - the selected parent ref as the start point,
+   - `codex/<short-kebab-summary>` as the unique local branch unless the user requests another name,
+   - a unique sibling path such as `../<repo>-worktrees/<short-kebab-summary>`.
+6. Never develop directly on `main`, `master`, or `develop`. Perform all remaining repository work from the linked worktree and leave it in place for review or follow-up unless the user explicitly requests cleanup.
 
 ## Plan
 

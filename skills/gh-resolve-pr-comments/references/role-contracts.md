@@ -6,13 +6,15 @@ Load this file before delegating PR comment resolution work. Keep GitHub writes 
 
 Every worker receives:
 
-- target repository root and PR URL/number,
-- base branch, head branch, base SHA, and current head SHA,
+- control checkout path, assigned PR worktree root, local worktree branch, and PR URL/number,
+- base branch, head repository, head ref, base SHA, current head SHA, and expected remote head OID,
 - comment URL, comment ID, thread ID, file path, line/range, and quoted comment text when working on one comment,
 - run directory and evidence directory,
 - `BROWSER_SESSION_STATE_FILE`, Playwright command prefix, assigned tab or tab-creation instructions, viewport, and the no-separate-browser rule for browser work,
-- current git status summary and the rule to preserve unrelated changes,
+- current worktree status summary and the rules to preserve unrelated changes and keep all repository operations inside the assigned worktree,
 - expected return shape and whether GitHub writes are prohibited.
+
+The control checkout is read-only worker context. Workers must not create, remove, or repoint worktrees. Only the Supervisor may push commits, post GitHub comments, or resolve threads.
 
 Workers should return compact structured output. Include source URLs, commands, screenshots, logs, commit hashes, and uncertainty; do not paste unbounded logs.
 
@@ -133,14 +135,14 @@ Input: one linted plan with `lint_score: 100`.
 
 Task:
 
-1. Re-check git status and current PR head before editing.
+1. From the assigned PR worktree, re-check git status, local `HEAD`, and the current PR head before editing. Stop if either the worktree or remote head differs from the Supervisor's expected state.
 2. Implement only the approved plan. If reality diverges, stop and return the deviation to the Supervisor rather than improvising materially different work.
 3. Preserve unrelated local changes. Do not rewrite history unless explicitly instructed by the user.
 4. Run every required check/tool from the plan. Add or update focused tests when the plan calls for them or the risk justifies them.
-5. Create one or more detailed commits when files changed. Include PR/comment context in commit bodies when useful. Do not create an empty commit for evidence-only work.
-6. Return changed files, commit hashes, checks run, check results, evidence paths, and any plan deviations.
+5. Create one or more detailed local commits when files changed. Include PR/comment context in commit bodies when useful. Do not create an empty commit for evidence-only work.
+6. Return changed files, commit hashes, checks run, check results, evidence paths, final worktree status, and any plan deviations.
 
-Implementation agents do not post GitHub comments or mark threads resolved.
+Implementation agents do not push, post GitHub comments, or mark threads resolved.
 
 ## Verification Agent
 
@@ -148,7 +150,7 @@ Input: original comment, final plan, implementation report, commit hashes, and e
 
 Task:
 
-1. Independently inspect the diff and relevant code path.
+1. Independently inspect the diff and relevant code path from the assigned PR worktree.
 2. Re-run the required checks or a defensible subset when full checks are too expensive; report any skipped checks with reasons.
 3. Verify the comment's requested outcome:
    - for browser/web behavior, use the shared Playwright session and capture screenshots,
@@ -160,7 +162,7 @@ If verification fails or is inconclusive, the Supervisor routes the item back to
 
 ## Supervisor GitHub Replies
 
-Reply to the original comment or review thread whenever possible. If GitHub only allows a PR-level reply, link the original comment URL.
+For code-changing items, post a resolved reply only after independently verified commits have been pushed and GitHub reports the pushed commit as the current PR head. For evidence-only items, require independent verification and confirm that the PR head remains at the expected OID; no commit or push is required. Reply to the original comment or review thread whenever possible. If GitHub only allows a PR-level reply, link the original comment URL.
 
 Resolved template:
 

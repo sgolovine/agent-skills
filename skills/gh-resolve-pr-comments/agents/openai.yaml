@@ -1,4 +1,4 @@
 interface:
   display_name: "GH Resolve PR Comments"
-  short_description: "Resolve GitHub PR review comments"
-  default_prompt: "Use $gh-resolve-pr-comments to classify and resolve comments on this GitHub PR."
+  short_description: "Resolve PR comments in isolated worktrees"
+  default_prompt: "Use $gh-resolve-pr-comments to create an isolated worktree for this PR, then classify and resolve its review comments."

@@ -1,5 +1,19 @@
 {
   "scope": "global",
   "source": "skills/",
-  "harnesses": ["claude-code", "opencode", "pi"]
+  "harnesses": [
+    {
+      "name": "claude-code"
+    },
+    {
+      "name": "opencode"
+    },
+    {
+      "name": "pi"
+    },
+    {
+      "name": "codex",
+      "useHarnessFolder": true
+    }
+  ]
 }

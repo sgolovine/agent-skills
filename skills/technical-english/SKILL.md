@@ -18,15 +18,9 @@ Select one result level before you write or examine text:
 
 Use a full-dictionary result only when you can access the official dictionary and the applicable project terminology.
 
-If these sources are not available, state that limitation. Do not claim compliance, certification, or a full STE audit.
+If these sources are not available, state that limitation and do not describe the result as a full STE audit.
 
-## Protect the standard and the input
-
-Do not bundle the official PDF.
-Do not commit the official PDF.
-Do not cache the official PDF.
-Do not reconstruct the official PDF or its dictionary.
-Do not reproduce the official PDF or its dictionary.
+## Preserve the input
 
 Do not change these elements unless the user includes them in the requested scope:
 
@@ -66,7 +60,6 @@ Examine every editable word. For each word:
 9. Find an approved synonym, or change the sentence construction.
 10. Use a technical term only when the applicable project or subject field approves it.
 11. If no approved project term exists, apply Rules 1.9 or 1.12 before you select a new term.
-12. Record the lookup decision without copying the dictionary entry.
 
 An alternative in the dictionary is a suggestion. It is not an automatic replacement.
 
@@ -103,10 +96,6 @@ When the user requests an audit, report each finding with this structure:
 
 Do not invent rule numbers. Use only identifiers in `references/issue-9-rules.md`.
 
-End a full-dictionary report with this statement:
-
-> This result used the available Issue 9 dictionary and project terminology. It is not an ASD certification or a guarantee of compliance.
-
 ## Scope
 
 STE supports technical documentation. It does not define general formatting, abbreviation selection, or unit conventions.
@@ -122,5 +111,3 @@ Use these references:
 - `references/issue-9-rules.md` — paraphrased Issue 9 rule and recommendation inventory
 - `references/checklist.md` — full writing and audit list
 - `references/applications.md` — scope limits and local software-documentation applications.
-
-ASD-STE100 is a registered trademark of ASD. This skill is not affiliated with or endorsed by ASD or STEMG.

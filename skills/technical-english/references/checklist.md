@@ -26,7 +26,6 @@ Apply this section only to a full-dictionary result.
 - [ ] Examine each word that is not in the dictionary as a possible technical noun or technical verb.
 - [ ] Make sure that each technical term agrees with approved project terminology.
 - [ ] Apply Rule 1.9 or 1.12 when no approved project term exists.
-- [ ] Record decisions without copying dictionary definitions or examples.
 
 For a rules-only result, mark all dictionary-dependent items as not examined. Do not claim a full audit.
 
@@ -145,4 +144,3 @@ Do not flag every mid-sentence `if` or `when`. Rule 5.4 applies to a prerequisit
 - [ ] Report each finding with an accurate rule or recommendation identifier.
 - [ ] Distinguish rules from General Recommendations.
 - [ ] State whether the result is rules-only or full-dictionary.
-- [ ] Do not claim ASD certification or guaranteed compliance.

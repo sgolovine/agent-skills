@@ -40,7 +40,8 @@ npx @sunnygg/distributor sync
 
 ## Layout
 
-- `skills/` contains installable skill folders.
+- `skills/<skill-name>/` contains complete, installable skills.
+- `skills/fragments/` contains reusable building blocks that other skills consume. Fragments are not complete skills and are not installed on their own.
 - `references/` contains instructions shared across skills.
 - `scripts/` contains project utilities.
 

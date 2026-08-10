@@ -120,9 +120,9 @@ Use these headings in the applicable reports:
 ## Specification
 ```
 
-Give each concrete finding a severity, file, hunk, evidence, and required correction. Keep possible smells separate from hard violations.
+Give each concrete finding a severity. Give its file, hunk, evidence, and required correction.
 
-Do not merge or rerank the two reports. The Supervisor sends all concrete findings to the Review Resolver.
+Do not merge the two reports. Do not rerank the reports. The Supervisor sends all concrete findings to the Review Resolver.
 
 End the review round with one summary line. Give the finding total and most severe issue for each axis.
 

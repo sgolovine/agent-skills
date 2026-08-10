@@ -2,49 +2,20 @@
 
 Interview the user until all parties share one understanding. Use a design tree, an interview glossary, and short architecture decision records.
 
-Write all new grill documents under `<run-path>/grill/`. Create as many interview documents as the interview needs.
+Write new grill documents under `<run-path>/grill/`. Treat repository context documents as read-only input.
 
-Treat repository context documents as read-only input during this phase.
+Use [grill-templates.md](grill-templates.md) only when you create or update its applicable artifact.
 
 ## Prepare
 
 1. Inspect the repository for facts that can affect the interview.
 2. Read the root `CONTEXT-MAP.md` when it exists.
-3. Use the context map to find each bounded context and its `CONTEXT.md`.
-4. Use the context map to find each applicable architecture decision record (ADR) directory.
+3. Use the map to find each bounded context.
+4. Use the map to find each applicable architecture decision record directory.
 5. Otherwise, read the root `CONTEXT.md` when it exists.
 6. Treat a repository without a context map as one context.
-7. Do not create an interview context file before the first resolved term exists.
-8. Do not create an interview ADR directory before the first applicable decision exists.
-
-Use this structure for one context:
-
-```text
-<run-path>/grill/
-├── CONTEXT.md
-├── shared-understanding.md
-└── docs/
-    └── adr/
-        ├── 0001-event-sourced-orders.md
-        └── 0002-postgres-for-write-model.md
-```
-
-Use this structure for multiple contexts:
-
-```text
-<run-path>/grill/
-├── CONTEXT-MAP.md
-├── shared-understanding.md
-├── docs/
-│   └── adr/
-└── contexts/
-    ├── ordering/
-    │   ├── CONTEXT.md
-    │   └── docs/adr/
-    └── billing/
-        ├── CONTEXT.md
-        └── docs/adr/
-```
+7. Create an interview context file only after the first term is resolved.
+8. Create an interview ADR directory only after the first decision qualifies.
 
 ## Work the Design Tree
 
@@ -60,146 +31,64 @@ The **frontier** contains decisions that have all prerequisite answers. Work in 
 6. Return the question batch to the Supervisor.
 7. Wait for the user answers before the next round.
 
-Use this exact question format:
+Find repository facts before you ask the user. Treat an incomplete investigation as an unsettled prerequisite.
 
-```text
-❓ **Q1** - **<question title>**: <question body and, when useful, choices>
-
-➡️ <recommended answer>
-```
-
-Find repository facts before you ask the user. Use available inspection tools for this work.
-
-Treat an incomplete investigation as an unsettled prerequisite. Continue with independent frontier questions while the investigation continues.
-
-The user decides each material choice. Do not decide silently for the user.
+Continue with independent frontier questions during the investigation. The user decides each material choice.
 
 ## Make the Domain Language Precise
 
 Apply these checks during each round:
 
-- Show a glossary conflict when the user gives a term a different definition.
-- Propose one precise term when the user gives a vague or overloaded term.
+- Show a glossary conflict when one term has different definitions.
+- Propose one precise term for a vague or overloaded term.
 - Test concrete edge cases that clarify boundaries and relationships.
 - Show a conflict when code and the user description disagree.
 - Identify the applicable bounded context.
 - Ask the user when the applicable context is not clear.
 
-For example, ask whether `account` means **Customer** or **User**.
-
 ## Update the Interview Glossary
 
-After each resolved domain term, update the applicable interview `CONTEXT.md`. Do not delay the update until the interview ends.
+After each resolved domain term, update the applicable interview `CONTEXT.md`.
 
-An interview `CONTEXT.md` contains domain terms only. Do not add implementation details, specifications, programming concepts, design notes, or scratch content.
-
-Use this format:
-
-```md
-# {Context Name}
-
-{One or two sentences that describe the context and its purpose.}
-
-## Language
-
-**Order**:
-{A one-sentence or two-sentence definition}
-_Avoid_: Purchase, transaction
-
-**Invoice**:
-A request for payment that a customer receives after delivery.
-_Avoid_: Bill, payment request
-
-**Customer**:
-A person or organization that places orders.
-_Avoid_: Client, buyer, account
-```
-
-Apply these glossary rules:
+An interview `CONTEXT.md` contains domain terms only. Apply these rules:
 
 - Select one preferred term for each concept.
 - Put prohibited synonyms in `_Avoid_`.
-- Use one sentence or two sentences for each definition.
+- Use a maximum of two sentences for each definition.
 - Define the concept identity, not its behavior.
 - Include only project domain terms.
-- Exclude general terms such as timeouts, error types, and utility patterns.
+- Do not add implementation details.
+- Do not add specifications.
+- Do not add programming concepts.
+- Do not add design notes.
+- Do not add scratch content.
 - Add subheadings only when natural term groups exist.
 - Keep one flat list when the terms form one group.
 
-For multiple contexts, use an interview `CONTEXT-MAP.md` such as this example:
-
-```md
-# Context Map
-
-## Contexts
-
-- [Ordering](./contexts/ordering/CONTEXT.md) — Receives and tracks customer orders
-- [Billing](./contexts/billing/CONTEXT.md) — Generates invoices and processes payments
-- [Fulfillment](./contexts/fulfillment/CONTEXT.md) — Manages warehouse selection and shipping
-
-## Relationships
-
-- **Ordering → Fulfillment**: Ordering emits `OrderPlaced`. Fulfillment receives the event and starts item selection.
-- **Fulfillment → Billing**: Fulfillment emits `ShipmentDispatched`. Billing receives the event and generates an invoice.
-- **Ordering ↔ Billing**: The contexts share `CustomerId` and `Money` types.
-```
-
 ## Record Important Architecture Decisions
 
-Offer an interview ADR only when the decision meets all three conditions:
+Offer an interview ADR only when all these conditions apply:
 
 1. A later reversal has a meaningful cost.
 2. A future reader will probably ask for the reason.
 3. The decision contains a real trade-off between alternatives.
 
-These decisions can qualify:
+Examples include architecture shape, integration patterns, substantial technology lock-in, boundaries, explicit exclusions, and non-obvious constraints.
 
-- The architecture shape, such as a monorepo or an event-sourced write model
-- An integration pattern between contexts
-- A technology choice that causes substantial lock-in
-- An ownership, boundary, or scope decision
-- An explicit exclusion
-- An intentional change from an expected solution
-- A constraint that the code does not show
-- A rejected alternative when its rejection reason is not clear.
+Do not create an ADR for an easily reversed choice. Do not create an ADR for a decision without alternatives.
 
-Do not create an ADR for an easily reversed choice. Do not create an ADR for an obvious choice or a decision without alternatives.
-
-Put interview ADRs in the applicable `docs/adr/` directory under `<run-path>/grill/`. Create that directory only when the first ADR qualifies.
-
-Find the highest number in that directory. Increment the number and use `NNNN-short-slug.md`.
-
-Use this minimum format:
-
-```md
-# {Short decision title}
-
-{One to three sentences that give the context, decision, and reason.}
-```
-
-Add an optional section only when it gives necessary information:
-
-- Add status frontmatter when the decision can change.
-- Use `proposed`, `accepted`, `deprecated`, or `superseded by ADR-NNNN`.
-- Add **Considered Options** when rejected alternatives are important.
-- Add **Consequences** when the decision has non-obvious effects.
+Put each ADR in the applicable `docs/adr/` directory under `<run-path>/grill/`. Increment the highest existing number for its `NNNN-short-slug.md` name.
 
 ## Finish the Interview
 
-The interview frontier must be empty before the confirmation step. No branch can contain a silent assumption.
+The interview frontier must be empty before confirmation. No branch can contain a silent assumption.
 
-Write the candidate result to `<run-path>/grill/shared-understanding.md`. Include the stack base and applicable publication constraints.
+1. Write the candidate result to `<run-path>/grill/shared-understanding.md`.
+2. Include the stack base and applicable publication constraints.
+3. Return the candidate to the Supervisor.
+4. Apply each correction that the Supervisor returns.
+5. Recalculate the frontier after a correction.
+6. Record explicit confirmation in `shared-understanding.md`.
+7. Report completion only after confirmation is recorded.
 
-Return the candidate shared understanding to the Supervisor. Remain responsible for the grill phase.
-
-The Supervisor asks the user to confirm or correct the candidate. The Supervisor keeps the human decision in the main interaction.
-
-The Supervisor returns the response to the same Grill Worker when resume support exists.
-
-Otherwise, the Supervisor starts a replacement Grill Worker. The replacement reads all durable grill documents before it applies the user response.
-
-When the Supervisor returns the user response, apply each correction. Recalculate the frontier after a correction.
-
-When the user confirms the candidate, record the explicit confirmation in `shared-understanding.md`. Then report that the grill phase is complete.
-
-Do not start specification work before the Grill Worker reports completion. Do not implement the design during the grill phase.
+Remain responsible for the grill phase. Do not start specification work. Do not implement the design.

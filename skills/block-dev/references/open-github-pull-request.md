@@ -26,7 +26,7 @@ Publish one reviewed block branch against its established parent branch.
 
 ## Write the Pull Request Text
 
-Read `$technical-english` and use rules-only mode. Do not claim a full-dictionary result.
+Read `$technical-english`. Use it in rules-only mode. Do not claim a full-dictionary result.
 
 Use concise bullet lists instead of paragraphs. You can use terse bullet fragments when they make the description shorter.
 
@@ -68,9 +68,9 @@ Use the established parent branch for `<parent>`. This parent makes the pull req
 
 Create a ready pull request only when the user explicitly requests that state. Do not mark a draft ready without explicit authority.
 
-Do not merge the pull request. Do not request reviewers unless the user requests them.
+Do not merge the pull request. Request reviewers only when the user requests them.
 
-Do not change remote repository settings unless the user requests the exact change.
+Change remote repository settings only when the user requests the exact change.
 
 ## Handle GitHub CLI Failure
 
@@ -92,4 +92,4 @@ Return these results:
 - The skipped checks
 - The unresolved risks.
 
-Record the same evidence in `<run-path>/run-state.md`. Do not record credentials, tokens, or secret values.
+Record the same evidence in `<run-path>/run-state.md`. Do not record credentials. Do not record tokens. Do not record secret values.

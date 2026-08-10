@@ -7,26 +7,24 @@ description: Grill a repository change request with a human. Then create a speci
 
 ## Operating Principle
 
-Use the human gate to remove material uncertainty. Then, move each block through implementation, review, repair, and publication without more routine questions.
+Use the human gate to remove material uncertainty. Then move each block through planning, implementation, review, repair, and publication.
 
 ## Required Support
 
-1. Require a Git repository and real subagent support.
-2. Stop if the harness cannot spawn subagents.
+1. If the current directory is not a Git repository, stop.
+2. If the harness cannot start subagents, stop.
 3. Use the current agent as the **Supervisor**.
-4. Keep all source changes serial in the linked worktree.
-5. Do not perform a worker role in the Supervisor.
-6. Do not let an ordinary worker spawn another worker.
-7. Read [agent-roles.md](references/agent-roles.md) before the first worker starts.
+4. Keep all source changes serial in one linked worktree.
+5. Before each phase, load only the applicable worker contracts from [agent-roles.md](references/agent-roles.md).
 
 Use `$technical-english` in rules-only mode for every generated prose artifact. Do not claim a full-dictionary result.
 
 ## Prepare the Run
 
 1. Inspect the repository status, remotes, instructions, code, tests, and documentation.
-2. Preserve all unrelated changes in the control checkout.
+2. Preserve unrelated changes in the control checkout.
 3. Create `.block-dev/<request-slug>/` in the control checkout.
-4. Keep every run artifact uncommitted.
+4. Keep each run artifact uncommitted.
 5. Record run facts in `.block-dev/<request-slug>/run-state.md`.
 
 Use this artifact layout:
@@ -48,31 +46,25 @@ Use this artifact layout:
             └── block-plan.md
 ```
 
-Do not stage a file under `.block-dev/`. Repository documents are input unless a finalized block explicitly changes them.
+Repository documents are input unless a finalized block explicitly changes them.
 
 ## Complete the Human Gate
 
-1. Spawn the Grill Worker from [grill.md](references/grill.md).
-2. Give the worker the request, repository root, and run artifact path.
-3. Relay each question batch to the user.
-4. Do not answer a question for the user.
-5. Return each answer to the same worker when resume support exists.
-6. Otherwise, start a replacement Grill Worker from the durable grill documents.
-7. Continue until the design frontier is empty.
-8. Require the Grill Worker to return the candidate shared understanding.
-9. Ask the user to confirm or correct the candidate.
-10. Return the user response to the same or replacement Grill Worker.
-11. Require the Grill Worker to record the confirmation or apply the corrections.
-12. Repeat the interview when a correction reopens the design frontier.
-13. Start autonomous work only after the Grill Worker reports that the grill phase is complete.
+1. Start the Grill Worker.
+2. Relay each question batch to the user.
+3. Return each answer to the same worker when resume support exists.
+4. Otherwise, start a replacement worker from the durable grill documents.
+5. Continue until the design frontier is empty.
+6. Ask the user to confirm or correct the candidate shared understanding.
+7. Return the response to the Grill Worker.
+8. Repeat the interview if a correction reopens the design frontier.
+9. Continue only after the worker records explicit user confirmation.
 
-The Grill Worker can report completion only after it records explicit user confirmation. Keep the user decision in the Supervisor interaction.
-
-Include the stack base in the confirmed understanding. Include important branch conventions and publication constraints when they are not clear.
+The confirmed understanding must include the stack base. It must include applicable branch conventions and publication constraints.
 
 ## Create the Plan Artifacts
 
-After confirmation, create one isolated linked worktree for the complete stack:
+After confirmation, create one linked worktree for the complete stack:
 
 1. Fetch the applicable remote refs.
 2. Resolve the confirmed base to an immutable commit.
@@ -80,54 +72,48 @@ After confirmation, create one isolated linked worktree for the complete stack:
 4. Record the worktree, base branch, base ref, and base commit in `run-state.md`.
 5. Use the linked worktree for all repository changes.
 
-Then, create and validate the plan artifacts:
+Then run these workers in order:
 
-1. Spawn the Specification Writer.
-2. Require the writer to create `.block-dev/<request-slug>/SPEC.md`.
-3. Spawn the Block Planner after the specification is complete.
-4. Require sequential files under `.block-dev/<request-slug>/blocks/`.
-5. Use `NN-short-description.md` names with hyphens and two-digit numbers.
-6. Spawn the Coverage Auditor after all blocks exist.
-7. Send each coverage finding to one Block Reviser.
-8. Re-run the Coverage Auditor after each revision round.
-9. Stop after three failed repair rounds.
-10. Report the remaining gaps and conflicts when the gate fails.
+1. Run the Specification Writer to create `SPEC.md`.
+2. Run the Block Planner to create sequential block files.
+3. Run the Coverage Auditor after all block files exist.
+4. If the review fails, run one Block Reviser.
+5. Run the Coverage Auditor again after each repair round.
 
-The Coverage Auditor must confirm complete specification coverage. The auditor must also confirm that the blocks have no gaps or conflicts.
+Run a maximum of three repair rounds. If the final coverage review does not pass, stop. Report the remaining gaps and conflicts.
+
+The coverage gate passes only with complete specification coverage and no block conflicts.
 
 ## Implement the Stack
 
-Process blocks in file-name order. Complete one block before the next block starts.
+Process block files in file-name order. Complete one block before the next block starts.
 
 For each block:
 
-1. Set the first parent to the confirmed base branch.
-2. Set each later parent to the previous block branch.
-3. Create the block branch from the recorded parent commit.
+1. For the first block, record the confirmed base branch and base commit.
+2. For each later block, record the previous block branch and commit.
+3. Create the block branch from its recorded parent commit.
 4. Follow the repository branch convention when one exists.
 5. Otherwise, use `block-dev/<request-slug>/<block-file-stem>`.
-6. Spawn one Development Worker for the block.
-7. Require applicable tests and repository checks.
-8. Run the reviews in [code-review.md](references/code-review.md).
-9. Spawn the Standards Reviewer and Block-Plan Reviewer in parallel.
-10. Use the parent ref as the fixed point.
-11. Store both reports under `reviews/<block-number>/round-<number>/`.
-12. Send all concrete findings to one Review Resolver.
-13. Re-run both review axes after each repair round.
-14. Stop after three failed repair rounds.
-15. Report unresolved findings when the review gate fails.
-16. Spawn the PR Publisher only after both review axes pass.
-17. Follow [open-github-pull-request.md](references/open-github-pull-request.md).
-18. Stop if publication fails.
-19. Start the next branch from the published branch commit.
+6. Run one Development Worker.
+7. Run the Standards Reviewer and Block-Plan Reviewer in parallel.
+8. Use the recorded parent commit as the fixed review point.
+9. Store both reports under `reviews/<block-number>/round-<number>/`.
+10. If either review fails, run one Review Resolver.
+11. Run both reviews again after each repair round.
+12. After both reviews pass, run the PR Publisher.
+13. Use [open-github-pull-request.md](references/open-github-pull-request.md) as the publication authority.
+14. Start the next branch from the published branch commit.
 
-Do not merge a pull request. Do not change its draft state, reviewers, or repository settings without explicit authority.
+Run a maximum of three repair rounds. If the final implementation review does not pass, stop. Report the unresolved findings.
+
+If publication fails, stop.
 
 ## Handle Blockers
 
 After the human gate, do not ask routine implementation questions. Use the specification and finalized blocks as the authority.
 
-Stop when a worker finds an unapproved product decision or an unrecoverable external blocker. Preserve the worktree, branches, commits, and run artifacts. Report exact evidence for the blocker.
+Stop when a worker finds an unapproved product decision or an unrecoverable external blocker. Preserve the current run state. Report exact evidence for the blocker.
 
 ## Report the Result
 

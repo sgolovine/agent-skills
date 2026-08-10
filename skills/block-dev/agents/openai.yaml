@@ -1,0 +1,4 @@
+interface:
+  display_name: "Block Development"
+  short_description: "Build reviewed, stacked pull requests from small blocks"
+  default_prompt: "Use $block-dev to clarify this repository change, plan small blocks, and publish a reviewed pull request stack."

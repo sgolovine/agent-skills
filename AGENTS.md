@@ -2,9 +2,7 @@
 
 ## Project Shape
 
-This repo stores reusable Codex CLI skills. Create and edit skills inside `skills/<skill-name>/`; keep repo utilities in `scripts/`.
-
-`skills/fragments/` contains building blocks that other skills consume. Fragments are not complete skills and must not contain `SKILL.md` or be installed as skills.
+This repo stores reusable Codex CLI skills. Create and edit skills inside `skills/<skill-name>/`. Keep repository utilities in `scripts/`.
 
 Skill folders should be installable by `scripts/install-agent-skills.ts`, which discovers directories under `skills/` that contain `SKILL.md`.
 
@@ -49,8 +47,7 @@ When creating a new skill, update `README.md` and add the skill to the available
 
 For skill changes, verify:
 
-- Complete skills are under `skills/<skill-name>/`; reusable building blocks are under `skills/fragments/`.
-- Fragments do not contain `SKILL.md` and are not listed as available skills.
+- Complete skills are under `skills/<skill-name>/`.
 - `SKILL.md` has valid frontmatter with `name` and `description`.
 - The skill targets Codex CLI behavior only.
 - New skills are listed in the `README.md` table of skills, with the skill name linked to `skills/<skill-name>/SKILL.md`.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub PR Screenshots"
+  short_description: "Capture and upload PR before-and-after UI images"
+  default_prompt: "Use $github-pr-screenshots to capture before-and-after UI screenshots for this pull request and upload them to the PR."

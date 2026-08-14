@@ -1,0 +1,6 @@
+interface:
+  display_name: "Grill with Docs"
+  short_description: "Grill a design and write its domain docs"
+  default_prompt: "Use $grill-with-docs to interview me about this repository plan, sharpen its domain language, and record qualifying decisions."
+policy:
+  allow_implicit_invocation: false

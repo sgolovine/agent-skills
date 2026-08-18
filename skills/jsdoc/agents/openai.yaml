@@ -1,0 +1,4 @@
+interface:
+  display_name: "JSDoc"
+  short_description: "Document every function in a source file"
+  default_prompt: "Use $jsdoc to add or update complete JSDoc for every function in this source file."

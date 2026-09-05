@@ -17,7 +17,7 @@ Infer the target repository from the current working directory. If no git reposi
 
 ## Baseline
 
-1. Inspect repository state before changing anything: `git status --short --branch` and `git remote -v`.
+1. Inspect repository state before changing anything: `git status --short --branch`, `git remote -v`, and `git worktree list`.
 2. Identify a parent branch from `main`, `master`, or `develop`:
    - If the user names the parent, require it to be one of those three and to exist; otherwise stop and ask for a supported parent.
    - When the user does not name the parent, use the remote default branch when it is one of those three; resolve an unset `origin/HEAD` with `git remote show origin`.
@@ -31,6 +31,14 @@ Infer the target repository from the current working directory. If no git reposi
    - `codex/<short-kebab-summary>` as the unique local branch unless the user requests another name,
    - a unique sibling path such as `../<repo>-worktrees/<short-kebab-summary>`.
 6. Never develop directly on `main`, `master`, or `develop`. Perform all remaining repository work from the linked worktree and leave it in place for review or follow-up unless the user explicitly requests cleanup.
+
+## Coordinate With Other Agents
+
+Other agents may be working on the same code in different worktrees. Worktree isolation does not prevent overlapping changes or integration conflicts. Coordinate with those agents so everyone's work can land successfully.
+
+- Before editing, use available agent coordination channels to identify active work that overlaps the task. Share the intended scope, branch, and affected files or interfaces; agree on ownership, dependencies, and landing order where work overlaps.
+- Keep affected agents informed when scope, shared interfaces, or dependencies change. Preserve their work, and resolve conflicting approaches together rather than overwriting changes or silently duplicating implementation. If coordination is unavailable, report the unresolved overlap and continue independent work.
+- Before the final validation and PR, fetch the latest parent and check relevant companion branches or PRs. Incorporate required landed changes into the task branch without rewriting published checkpoints, resolve conflicts while preserving both tasks' intended behavior, and rerun affected checks. Document companion PRs, dependencies, and the agreed landing order in the PR and handoff; report any unresolved integration blocker. Coordination does not authorize merging PRs or modifying another agent's branch or worktree.
 
 ## Plan
 

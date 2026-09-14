@@ -1,4 +1,4 @@
 interface:
   display_name: "Autonomous Development"
-  short_description: "Develop in isolated worktrees with regular pushes"
-  default_prompt: "Use $autonomous-development to build this feature in a new branch and linked worktree, publish coherent checkpoints, validate it, and open a draft PR."
+  short_description: "Supervise workers from research through a validated PR"
+  default_prompt: "Use $autonomous-development to rightsize this feature, supervise fresh workers through research, planning, development in an isolated worktree, and validation, publish coherent checkpoints, and open a draft PR after supervisor sign-off."

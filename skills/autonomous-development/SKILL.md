@@ -68,6 +68,7 @@ Before implementation, the planning worker returns a concise plan for the superv
 - assumptions and any accepted clarifications,
 - ordered implementation steps,
 - validation criteria that define done behavior, and the evidence required before opening the PR: test commands, manual checks, screenshots, or logs,
+- for any UI changes, the affected screens, states, and viewports to capture in before-and-after screenshots and upload to the PR during finalization,
 - risks, migrations, compatibility concerns, or rollout notes when relevant.
 
 If the plan reveals a material gap, the supervisor obtains the needed clarification before accepting it. Dispatch development only after the supervisor accepts the plan.
@@ -120,10 +121,11 @@ After validation sign-off, assign a fresh development worker to finalize the bra
    - implementation notes that matter for review,
    - validation commands and outcomes,
    - known gaps, skipped checks, or follow-up work,
-   - screenshots or artifact links when UI or visual behavior changed.
+   - a link to the uploaded screenshot comment when UI changes were made, added after the upload below.
+5. For any UI changes, use [the GitHub PR screenshots skill](../github-pr-screenshots/SKILL.md) with the newly created PR URL to capture, inspect, and upload before-and-after screenshots to the PR. This upload is required even for small UI changes. Verify that the posted comment displays every image and link it from the PR body. Local screenshot paths or other artifact links do not satisfy the upload requirement. If capture or upload is blocked, preserve any captured images and report their paths and the exact blocker; do not claim the task is complete.
 
 Do not merge the PR, mark it ready, request reviewers, or modify remote repository settings unless the user explicitly asks.
 
 ## Completion Criteria
 
-The supervisor finishes only after reviewing the finalization worker's handoff, confirming that the PR contains the signed-off commit, and reporting the branch, linked worktree path, pushed commits, PR URL, validation performed, supervisor sign-off, and any skipped checks or unresolved risks. Leave the linked worktree in place for review or follow-up unless the user explicitly asks to remove it. If pushing or opening a PR is blocked, keep the branch and commits reviewable and report the exact blocker.
+The supervisor finishes only after reviewing the finalization worker's handoff, confirming that the PR contains the signed-off commit and, for any UI changes, the uploaded screenshots, and reporting the branch, linked worktree path, pushed commits, PR URL, validation performed, supervisor sign-off, and any skipped checks or unresolved risks. Leave the linked worktree in place for review or follow-up unless the user explicitly asks to remove it. If pushing, opening a PR, or uploading required screenshots is blocked, keep the branch and commits reviewable and report the exact blocker.

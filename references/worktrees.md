@@ -5,7 +5,7 @@ Use this contract whenever a workflow requires an isolated Git worktree. The cal
 1. Treat the original checkout as a control checkout only. Inspect its status, branch, remotes, and refs, but do not switch branches, fast-forward it, stash changes, clean it, or alter pre-existing user work.
 2. Fetch the refs required by the calling workflow without checking them out. Resolve the chosen start point to a commit SHA before creating the worktree. For an existing PR, require that SHA to match the head OID reported by GitHub before doing repository-backed analysis.
 3. Choose a unique local branch and a unique sibling path outside the repository. Never place a linked worktree inside the repository. If the branch or path exists, do not reuse, delete, reset, or force it; choose another unique name or stop for direction.
-4. Create the branch and linked worktree from the explicit start point:
+4. Always create the branch and linked worktree directly with the `git` CLI using `git worktree add` from the explicit start point. Do not use harness-provided worktree tools, APIs, or helpers:
 
    ```bash
    repo="/absolute/path/to/control-checkout"

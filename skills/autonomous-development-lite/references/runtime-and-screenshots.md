@@ -1,6 +1,6 @@
-# Runtime Validation and UI Evidence
+# Runtime Validation and Screenshot Evidence
 
-Read this when validation needs a running application or the task changes UI. Use installed command-line tools and repository scripts, without relying on a harness browser or another skill.
+Read this for screenshot capture and PR upload on every task, and runtime setup when validation needs a running application. Use installed command-line tools and repository scripts, without relying on a harness browser or another skill.
 
 ## Discover and reuse the runtime
 
@@ -17,10 +17,36 @@ Read this when validation needs a running application or the task changes UI. Us
 - Match routes, interactions, viewport, color scheme, screenshot dimensions, fixture data, account state, and relevant flags between captures. Record the baseline SHA and final commit, commands, URL, and scenario for each pair. For new UI, capture the previous route or flow where the addition belongs. A loading screen or unrelated page is not a baseline.
 - Inspect every saved image for complete rendering, comparable state, the intended change, and absence of secrets. Retake misleading captures. Store labeled files such as `01-before-settings.png` and `01-after-settings.png` outside the checkout.
 
+## Capture non-UI evidence
+
+Capture actual task-relevant output such as rendered documentation, CLI behavior, or API responses using available local rendering or screenshot tools. Record the revision, command or URL, and scenario. Inspect images for readability, correct output, and absence of secrets; preserve labeled files outside the checkout. Capture before-and-after output where it demonstrates the change. If capture is blocked, report the exact blocker and keep screenshot delivery incomplete.
+
 ## Publish the evidence
 
-Include labeled Before/After pairs in the PR body or a linked PR comment. Use the repository's established artifact publication method with reviewer-accessible, durable image URLs, or upload through an already authenticated GitHub web session using a shell-driven browser script and the observed attachment control. Wait for upload completion, inspect the generated image links, and verify the posted result. A Markdown local filesystem path does not upload an image.
+Upload every task's screenshots to one PR comment and link that comment from the PR body. Use the repository's established image upload method when it produces durable, reviewer-accessible images displayed in the comment. Otherwise use an already authenticated GitHub web session through a shell-driven browser script:
 
-Use `gh pr edit <pr> --body-file <file>` or `gh pr comment <pr> --body-file <file>` to publish Markdown containing already hosted image URLs. These commands do not themselves upload local images. Inspect the existing PR before retrying a post to avoid duplicates.
+1. Open the created PR URL and verify the repository and PR. Browser authentication is separate from `gh auth status`; if no authorized unattended session is available, preserve the images and report the upload blocker.
+2. Locate the conversation comment composer and its attachment/file-upload control from observed page state. Add a concise summary and scenario labels, using Before/After pairs for UI changes and descriptive labels for non-UI output.
+3. Attach the local images through that control. Wait for every upload to finish and its preview or generated image Markdown to appear. Preserve the generated image URLs; never invent upload endpoints or image URLs.
+4. Submit the comment once. If navigation or a transient error makes submission uncertain, inspect the PR for the comment before retrying to avoid duplicates.
+5. Confirm the posted comment is visible on the requested PR and displays every image. Inspect the rendered result, obtain the comment permalink, and add it to the prepared PR body with `gh pr edit <pr> --body-file <file>`.
 
-Do not assume browser authentication follows from `gh auth status`, require interactive login, or create a new public hosting location as a workaround. If no authorized unattended upload method is available, retain the captures, include the publication blocker in the draft PR and final report, and leave screenshot delivery marked incomplete.
+A compact UI comment can use:
+
+```markdown
+## Screenshots
+
+<one-sentence summary of what reviewers should notice>
+
+### <scenario>
+
+| Before | After |
+| --- | --- |
+| <uploaded before image> | <uploaded after image> |
+```
+
+For non-UI work, use labeled images without implying a UI comparison. Include validation results when available, or standalone screenshot evidence when checks are blocked.
+
+`gh pr comment <pr> --body-file <file>` can publish Markdown containing already uploaded image URLs, but neither it nor `gh pr edit` uploads local images. Local paths or other artifact links do not satisfy screenshot publication.
+
+Do not require interactive login or create a new public hosting location as a workaround. If capture, upload, or posted-image verification fails, retain the captures and prepared comment, include the exact blocker in the draft PR and final report, and leave screenshot delivery marked incomplete.

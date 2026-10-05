@@ -47,7 +47,7 @@ Assigned worker:
 5. Read [the shared linked worktree contract](../../references/worktrees.md), then apply it before planning or editing, even when the original checkout is clean. Use:
    - the original checkout as the control checkout,
    - the selected parent ref as the start point,
-   - `codex/<short-kebab-summary>` as the unique local branch unless the user requests another name,
+   - `<harness>/<short-kebab-summary>` as the unique local branch unless the user requests another name,
    - a unique sibling path such as `../<repo>-worktrees/<short-kebab-summary>`.
 6. Never develop directly on `main`, `master`, or `develop`. Perform all remaining repository work from the linked worktree and leave it in place for review or follow-up unless the user explicitly requests cleanup.
 
@@ -84,7 +84,8 @@ Assigned development worker:
 5. Update documentation, examples, migrations, or configuration only when required by the changed behavior.
 6. Review the diff while working to catch accidental edits, generated noise, secret material, or unrelated changes.
 7. Create and publish checkpoints throughout development:
-   - Commit after each coherent milestone, such as a schema or API change, the core implementation, tests, or documentation. For a small atomic task, one implementation commit is sufficient.
+   - Create multiple focused commits as implementation progresses, committing each coherent milestone before moving to the next, such as a schema or API change, the core implementation, tests, or documentation. Do not accumulate the entire implementation for one final commit or defer splitting it into commits until the end.
+   - Use a single commit only for very minor work that forms one small, coherent change, such as a typo fix or a narrowly scoped one-line correction. A task being atomic does not by itself justify one commit. Choose meaningful boundaries; do not create empty or artificial commits merely to increase the count.
    - Before each checkpoint, run the fastest relevant targeted check and inspect the staged diff. Keep each commit focused and leave the branch in a usable state when practical.
    - Follow the repository's documented or recent commit convention. If none is clear, use Conventional Commits 1.0.0 (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`, and similar).
    - Push immediately after the first commit with `git push -u origin <branch>`, then push again after every later commit. Do not wait until the end of a multi-milestone task to publish all progress.

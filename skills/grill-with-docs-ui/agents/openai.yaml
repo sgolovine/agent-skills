@@ -1,0 +1,6 @@
+interface:
+  display_name: "Grill with Docs UI"
+  short_description: "Grill a design through a clickable browser form"
+  default_prompt: "Use $grill-with-docs-ui to interview me about this repository plan through the Grill UI, sharpen its domain language, and record qualifying decisions."
+policy:
+  allow_implicit_invocation: false

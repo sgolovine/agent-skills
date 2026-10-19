@@ -50,9 +50,9 @@ Process one PR at a time unless the user asks for parallel work. Keep launching 
 6. **Round cap.** After 5 review rounds without a clean verdict, mark the PR `blocked` with the open findings and move on.
 7. **Merge gate.** On `clean`, re-query the PR. Merge only when all of these hold:
    - `headRefOid` equals the head the clean review covered. If it moved, start a new round.
-   - `isDraft` is false, `mergeable` is `MERGEABLE`, and `mergeStateStatus` is `CLEAN`, or `UNSTABLE` when only non-required checks fail.
-   - `gh pr checks <n> --required` shows every required check passing, none pending.
-8. **Merge.** Run `gh pr merge <n> --repo <owner/repo> --match-head-commit <oid>` with the repository's allowed method: `--merge` when allowed, otherwise `--squash`, then `--rebase`. Never pass `--auto` or `--admin`, and never bypass branch protection. Confirm `state` is `MERGED`, then refresh the remaining PRs, since their mergeability may have changed.
+   - `isDraft` is false, `mergeable` is `MERGEABLE`, and `mergeStateStatus` is `CLEAN`.
+   - `gh pr checks <n> --repo <owner/repo> --json name,bucket,state` shows every check in bucket `pass` or `skipping`, none `pending`, `fail`, or `cancel`. Do not rely on `--required`: it exits 1 when the branch has no required checks.
+8. **Merge.** Read the allowed methods with `gh api repos/<owner/repo> --jq '{allow_merge_commit,allow_squash_merge,allow_rebase_merge}'`, then run `gh pr merge <n> --repo <owner/repo> --match-head-commit <oid>` with `--merge` when allowed, otherwise `--squash`, then `--rebase`. Never pass `--auto` or `--admin`, and never bypass branch protection. Confirm `state` is `MERGED`, then refresh the remaining PRs, since their mergeability may have changed.
 
 Blockers (failed child, inaccessible PR, pending or failing checks, conflicts, missing permissions, round cap) stop only that PR. Record the exact blocker, continue with the next PR, and retry on a later monitor run. Never merge with findings open or with checks pending or failing.
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Factory Resolve"
+  short_description: "Clear every open item on a Factory PR"
+  default_prompt: "Use $factory-resolve to fix this Factory PR's conflicts, review comments and findings, and failing checks in one pass, push without force, reply with evidence, and report to the Factory loop."

@@ -9,7 +9,7 @@ You are the supervisor of a merge loop. Child threads do the reviewing and fixin
 
 ## Requirements
 
-- T3 Code: `orchestrator_capabilities {}` must answer. Read `../dispatcher/references/hosts/t3-code.md` for tool names, `t3_thread_launch` fields, and the ACP fallback. If T3 Code is absent, report `pr-review-loop requires T3 Code.` and stop.
+- T3 Code: `orchestrator_capabilities {}` must answer. Read `shared/t3-code.md` for tool names, `t3_thread_launch` fields, and the ACP fallback. If T3 Code is absent, report `pr-review-loop requires T3 Code.` and stop.
 - `gh` authenticated for the target host (`gh auth status --hostname <host>`), with permission to mark PRs ready and merge them.
 - The `github-pr-review` and `gh-resolve-pr-comments` skills available to the child model. A child that cannot load its skill reports a blocker.
 
@@ -36,8 +36,9 @@ Rebuild at the start of every pass. Do not rely on memory of earlier turns. Runs
 - **GitHub:**
   ```sh
   gh pr list --repo <owner/repo> --state open --limit 200 \
-    --json number,title,url,author,isDraft,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,reviewDecision
+    --json number,title,url,author,isDraft,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,reviewDecision,labels
   ```
+  Skip every PR with the `factory` label; the Factory loop (`factory-loop`) owns it. Say so in the report.
   For each PR, get checks with `gh pr checks <n> --repo <owner/repo> --json name,bucket,state,link`. Do not use `--required`, which exits 1 when the branch has no required checks. Get review threads with `gh api graphql -f query='query($o:String!,$r:String!,$n:Int!){repository(owner:$o,name:$r){pullRequest(number:$n){reviewThreads(first:100){nodes{id isResolved comments(first:100){nodes{databaseId url path body createdAt}}}}}}}' -F o=<owner> -F r=<repo> -F n=<n>`.
 - **T3:** `t3_thread_list {titleContains:"PR #<n> "}` (the trailing space keeps `#1` from matching `#12`), with status. For each settled child not yet recorded, read its final report line with `t3_thread_read {threadId, view:"messages"}`.
 

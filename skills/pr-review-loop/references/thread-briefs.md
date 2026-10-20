@@ -1,6 +1,6 @@
 # Child Thread Briefs
 
-Send these as the `message` of `t3_thread_launch`. Fill every `<placeholder>`. Each child reports with `t3_thread_send` to the supervisor's `threadId`, using `mode:"queue"` and a `clientRequestId` equal to its report tag plus `-done` (for example `pr-<n>-review-r<round>-done`). Use the tool names given in `../../dispatcher/references/hosts/t3-code.md` for the child's harness. Append that file's T3 tool-fallback lines to every brief.
+Send these as the `message` of `t3_thread_launch`. Fill every `<placeholder>`. Each child reports with `t3_thread_send` to the supervisor's `threadId`, using `mode:"queue"` and a `clientRequestId` equal to its report tag plus `-done` (for example `pr-<n>-review-r<round>-done`). Use the tool names given in `../shared/t3-code.md` for the child's harness. Append that file's T3 tool-fallback lines to every brief.
 
 Every brief starts with this workspace block:
 

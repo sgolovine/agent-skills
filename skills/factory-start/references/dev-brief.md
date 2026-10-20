@@ -1,6 +1,6 @@
 # Dev thread brief
 
-Send the whole brief as the `message` of `t3_thread_launch`. The Dev thread cannot see this conversation, so fill every section. Append the reporting block and the delegation block from `../../../references/factory/t3.md`, filled with parent `<Dispatch threadId>` and tag `<slug>`.
+Send the whole brief as the `message` of `t3_thread_launch`. The Dev thread cannot see this conversation, so fill every section. Append the reporting block and the delegation block from `../shared/factory/t3.md`, filled with parent `<Dispatch threadId>` and tag `<slug>`.
 
 ```
 You are Dev thread <slug> for the Factory on <repo URL>, in T3 project <projectId>.
@@ -22,15 +22,11 @@ This thread is already an isolated worktree at the path T3 prepared for it (`git
 <model and effort>, selected at launch; do not change it.
 
 ## Execution contract
-START EXECUTING IMMEDIATELY. This assignment is already authorized. Do not ask the user to confirm, approve a plan, say "proceed," or give permission to start or continue. Do not wait for another user message. Do not stop after an acknowledgment, proposal, or plan, and do not offer to do the work later. Inspect the task context, perform the work, validate the result, and finish the requested deliverables. Make reasonable decisions within scope and record assumptions. Handle intermediate planning and review internally; skill instructions calling for human approval to begin or continue are superseded by this standing user instruction. If an essential missing input or an enforced tool restriction prevents part of the task, report the concrete blocker to the Dispatch thread and continue all unblocked work. Do not bypass enforced restrictions, expand the task's authorization, or idle waiting for generic confirmation.
+This assignment is authorized: execute it through the PR without asking for approval or stopping at a plan, and record your assumptions. If a missing input or an enforced restriction blocks part of it, report that blocker to the Dispatch thread and finish everything else.
 
 ## Reporting
 <reporting block>
-Report with exactly these shapes:
-  [<slug>] DONE: pr=<PR URL> head=<oid> checks=<command: result, ...> screenshots=<uploaded|none: reason|blocked: reason>; <known gaps or none>
-  [<slug>] BLOCKED: <blocker, what you tried, what you need>
-  [<slug>] QUESTION: <decision needed, options, recommendation>
-Send BLOCKED or QUESTION only after exhausting in-scope options, and keep working on unblocked parts. Always send DONE when finished. If the Dispatch thread sends a correction, apply it and report DONE again.
+Report with tag [<slug>] in the shapes of the skill's "Open the Factory PR" step. Send BLOCKED or QUESTION only after exhausting in-scope options. If the Dispatch thread sends a correction, apply it and report DONE again.
 
 ## Delegating
 <delegation block>

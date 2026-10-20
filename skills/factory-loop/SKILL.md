@@ -44,7 +44,7 @@ Keep a ledger in this thread as a cache: per PR the stage, round, current head, 
 Evaluate in order. Stop at the first rule that launches, merges, or skips, then go to the next PR.
 
 1. **Active children.** Record and skip. For a `waiting` child, read `t3_pending_request_list {threadId}` and answer only within its brief. If you cannot, mark the PR blocked and `t3_thread_organize {action:"mark_unread", threadId}`.
-2. **Unprocessed reports.** Record each finished child's report. A review's `BLOCKED: head moved` is not a blocker; rule 4 reviews the new head. Any other `BLOCKED` report is a blocker until the head changes. A child that finished `failed`, `interrupted`, or `cancelled`, or without a parseable report line, gets one ` retry` at the current head. A failed retry is a blocker.
+2. **Unprocessed reports.** Record each finished child's report. A review's `BLOCKED: head moved` is not a blocker; rule 4 reviews the new head. Any other `BLOCKED` report is a blocker until the head changes or rule 5 starts a new Round. A child that finished `failed`, `interrupted`, or `cancelled`, or without a parseable report line, gets one ` retry` at the current head. A failed retry is a blocker.
 3. **Draft.** Skip with stage `waiting: draft`. Never mark it ready; a draft Factory PR means a human is holding it.
 4. **Review needed.** No review reported `DONE` with `head=<headRefOid>`, or rule 5 starts a new Round. If a review of this head reported a `BLOCKED` other than head moved, report that blocker and skip. Round cap: if 5 reviews have already reported `DONE`, report the PR blocked with its open items and skip. Otherwise pin the head (`github.md`), launch `Factory #<n> review r<next round>` with the matching brief from `references/thread-briefs.md`, and skip.
    - **Full review** when no review reported `DONE`, or when the last reviewed head is not an ancestor of the pinned head (`git merge-base --is-ancestor <reviewed> <pinned>` fails after a force-push or rebase).
@@ -55,16 +55,16 @@ Evaluate in order. Stop at the first rule that launches, merges, or skips, then 
    - checks in bucket `fail` or `cancel`;
    - `mergeable` `CONFLICTING`, or `mergeStateStatus` `DIRTY` or `BEHIND`.
 
-   If this Round has no Resolve thread and there are items, pin the head and launch `Factory #<n> resolve r<round>` with every item, then skip. If its Resolve thread already reported:
-   - Items it reported but could not close, or all items when it reported `BLOCKED`, are blockers.
-   - Items it was never given (compare its brief, read with `t3_thread_read`): new comments, a human reply after its reply, later failures, a moved base. They start a new Round: launch that Round's re-review at the same head as in rule 4, then skip.
-   - If it pushed no commits, and the latest review reported findings or it closed any review thread or finding, also start a new Round at the same head. That re-review must confirm, before the merge gate, every closure it made without code on any thread, Factory or human: `fixed` with no push, `already-fixed`, `rejected`, and `evidence=updated` (a fix made only in the PR body or screenshots). `checks` and `base` items closed by a rerun or with nothing to merge need no re-review.
+   If this Round has no Resolve thread and there are items, pin the head and launch `Factory #<n> resolve r<round>` with every item, then skip. If its Resolve thread already reported, take the first that applies:
+   - **New items.** Items it was never given (compare its brief, read with `t3_thread_read`): new comments, a human reply after its reply, later failures, a moved base. Start a new Round: launch that Round's re-review at the same head as in rule 4, then skip.
+   - **Blocked.** It reported `BLOCKED`, or `DONE` with items it could not close (`disputed`, `unable-to-verify`). That report and its open items are blockers: go to rule 8. Relaunch nothing until the head changes or new items arrive.
+   - **Closed without code.** It reported `DONE`, pushed no commits, and the latest review reported findings or it closed any review thread or finding. Start a new Round at the same head. That re-review must confirm, before the merge gate, every closure it made without code on any thread, Factory or human: `fixed` with no push, `already-fixed`, `rejected`, and `evidence=updated` (a fix made only in the PR body or screenshots). `checks` and `base` items closed by a rerun or with nothing to merge need no re-review.
 
    Otherwise go to rule 6.
 6. **Wait.** If any check is `pending` or `mergeable` is `UNKNOWN`, mark the PR `waiting` and skip.
 7. **Merge gate.** Merge only when all hold:
    - `headRefOid` equals the head of the latest `DONE` review, and the chain is unbroken: a full review, then a review of every later change up to that head;
-   - that review was clean; a closure made without a new commit counts only after a same-head re-review (rule 5) confirms it;
+   - that review was clean, and it confirmed every closure rule 5 sends to a same-head re-review (`checks` and `base` closures by rerun or with nothing to merge need none);
    - no review thread is unresolved;
    - every check is in bucket `pass` or `skipping`;
    - the PR has the `factory` label, `isDraft` is false, `mergeable` is `MERGEABLE`, `mergeStateStatus` is `CLEAN` (or `HAS_HOOKS`), and `reviewDecision` is not `CHANGES_REQUESTED`.

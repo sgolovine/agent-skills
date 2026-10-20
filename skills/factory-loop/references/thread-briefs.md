@@ -6,8 +6,8 @@ Send each brief as the `message` of `t3_thread_launch`. Fill every `<placeholder
 
 | Thread | Title | `workspaceStrategy` | Model |
 | --- | --- | --- | --- |
-| Review | `PR #<n> review r<round>` | `{"type":"worktree","baseRef":"factory/pin-<n>-<short-oid>","branch":"factory/review-<n>-r<round>","startFromOrigin":false}` | Newest Codex flagship; newest Opus fallback |
-| Resolve | `PR #<n> resolve r<round>` | `{"type":"worktree","baseRef":"factory/pin-<n>-<short-oid>","branch":"factory/resolve-<n>-r<round>","startFromOrigin":false}` | Newest Opus |
+| Review | `Factory PR #<n> review r<round>` | `{"type":"worktree","baseRef":"factory/pin-<n>-<short-oid>","branch":"factory/review-<n>-r<round>","startFromOrigin":false}` | Newest Codex flagship; newest Opus fallback |
+| Resolve | `Factory PR #<n> resolve r<round>` | `{"type":"worktree","baseRef":"factory/pin-<n>-<short-oid>","branch":"factory/resolve-<n>-r<round>","startFromOrigin":false}` | Newest Opus |
 
 A retry appends ` retry` to the title and `-retry` to the branch. Always `interactionMode:"default"`; omit `runtimeMode`.
 

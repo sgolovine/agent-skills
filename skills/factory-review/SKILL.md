@@ -22,7 +22,7 @@ Review the change in context, not just the patch. Report only actionable issues 
 ## Workflow
 
 1. **Pin.** Require `git rev-parse HEAD` to equal the pinned head OID. Read `gh pr view <n> --repo <r> --json headRefOid,...` (fields in `github.md`). If GitHub's `headRefOid` differs, report `BLOCKED: head moved` and stop.
-2. **Gather evidence.** Read the PR metadata and body, the paginated changed files (`gh api --paginate --slurp repos/<r>/pulls/<n>/files?per_page=100`; the count must equal `changedFiles`), reviews, conversation comments, review threads, and checks. Fetch the base ref and compute `git merge-base <baseRefOid> HEAD`.
+2. **Gather evidence.** Read the PR metadata and body, the paginated changed files (`gh api --paginate --slurp 'repos/<r>/pulls/<n>/files?per_page=100'`; the count must equal `changedFiles`), reviews, conversation comments, review threads, and checks. Fetch the base ref and compute `git merge-base <baseRefOid> HEAD`.
 3. **Set scope.**
    - **Full:** review `git diff <merge-base> HEAD`. Inventory every changed file; review it or list it as excluded with a reason.
    - **Re-review:** review `git diff <reviewed OID> HEAD` and the code it affects: callers, dependents, tests, and invariants the change alters. Unchanged files are covered by the previous review. For a merge commit from the base, review only its conflict resolution with `git show --remerge-diff <merge SHA>`. If the affected area is most of the PR, do a full review and say so. Confirm each previous Factory finding is fixed, or that its `Factory resolution: rejected` reply holds. Re-raise a finding whose rejection fails as a new finding that links the earlier thread. For human threads, confirm claimed fixes are real; leave disputes to the humans.
@@ -35,7 +35,7 @@ Review the change in context, not just the patch. Report only actionable issues 
 
 ## Finding format
 
-Use the shape in `../../references/factory/pr-writing.md`. Prefix the title with the id: `### f2 [P2] <title>`. End every inline comment body with `<!-- factory-review -->`.
+Use the shape in `../../references/factory/pr-writing.md`, with the finding id before the severity: `### f2 [P2] <title>`. End every inline comment body with `<!-- factory-review -->`.
 
 Use the lowest severity the demonstrated impact supports:
 

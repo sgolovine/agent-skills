@@ -44,15 +44,22 @@ gh api graphql --paginate --slurp -f owner=<o> -f repo=<name> -F number=<n> -f q
         pageInfo{ hasNextPage endCursor } } } } }'
 ```
 
-If a thread's `totalCount` exceeds 100, fetch the rest before judging it.
+If a thread's `totalCount` exceeds 100, fetch the rest before judging it:
+
+```sh
+gh api graphql --paginate --slurp -f id=<thread node id> -f query='
+  query($id:ID!,$endCursor:String){ node(id:$id){ ... on PullRequestReviewThread{
+    comments(first:100,after:$endCursor){ nodes{ databaseId url body author{login} createdAt }
+      pageInfo{ hasNextPage endCursor } } } } }'
+```
 
 ## Factory comments and human comments
 
-All Factory writes post as the user, so the author login cannot tell them apart. Use the text:
+All Factory writes post as the authenticated user (`gh api user --jq .login`), so the login alone cannot tell them apart. Use the author and the text:
 
-- **Factory comment:** its body contains `<!-- factory-review -->`. Every Factory review body and inline comment carries this marker. A **Factory thread** is a review thread whose first comment is a Factory comment.
-- **Resolution reply:** its body starts with `Factory resolution: <outcome>`, where `<outcome>` is `fixed`, `rejected`, `already-fixed`, `disputed`, or `unable-to-verify`.
-- **Human comment:** any other comment.
+- **Factory comment:** written by the authenticated user, with `<!-- factory-review -->` in its body. Every Factory review body and inline comment carries this marker. A review thread whose first comment is a Factory comment is handled as a Factory comment.
+- **Resolution reply:** written by the authenticated user, with a body that starts with `Factory resolution: <outcome>`, where `<outcome>` is `fixed`, `rejected`, `already-fixed`, `disputed`, or `unable-to-verify`.
+- **Human comment:** any other comment, including one from another login that copies the marker.
 
 A human thread is **waiting on a human** when it is unresolved and its last comment is a `Factory resolution: disputed` or `Factory resolution: unable-to-verify` reply. A human comment after that reply reopens it as an Open item.
 

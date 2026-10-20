@@ -19,7 +19,7 @@ This thread becomes the Dispatch thread. Start or reuse the Factory for this rep
 2. Rename this thread `Factory Dispatch`.
 3. Ensure the `factory` label exists (`github.md`).
 4. Find the Factory. Look for a task whose prompt invokes `factory-loop` for this repo in `list_scheduled_tasks`, and for loop threads with `t3_thread_list {titleContains:"Factory Loop"}` (settled and unsettled). Prefer the thread the schedule is bound to.
-   - Loop thread found, with or without a schedule: send it `Run /factory-loop for <repo URL>. Report merges and blockers to the Dispatch thread <threadId>.` with `t3_thread_send {mode:"queue", clientRequestId:"factory-dispatch-<threadId>-start"}`. It creates its schedule if missing and makes this thread its report target.
+   - Loop thread found, with or without a schedule: send it `Run /factory-loop for <repo URL>. Report merges and blockers to the Dispatch thread <threadId>.` with `t3_thread_send {mode:"queue", clientRequestId:"factory-dispatch-<threadId>-start-<k>"}` (k counts starts from this thread). It creates its schedule if missing and makes this thread its report target.
    - Neither found: `t3_thread_launch {title:"Factory Loop", workspaceStrategy:{"type":"root"}, modelSelection:<newest Opus>, interactionMode:"default", message:"Run /factory-loop for <repo URL>. Report merges and blockers to the Dispatch thread <threadId>."}`. Confirm it starts.
 5. Greet in a few lines: the repo, the loop thread and its schedule state, the models (Dev and Resolve threads on Opus; Review threads on Codex, or the Opus fallback), and the open Factory PR count. Say you are ready for work. Start no Dev threads now.
 

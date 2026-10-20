@@ -41,7 +41,7 @@ Keep the body true to the current head. When a later commit changes behavior, up
 ## Review finding
 
 ```markdown
-### [P1] Imperative, specific title
+### f1 [P1] Imperative, specific title
 
 - Location: `path/to/file.ext:line`
 - Evidence: The input or state that triggers it and what the changed code does.

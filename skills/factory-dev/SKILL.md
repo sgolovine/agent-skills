@@ -50,7 +50,7 @@ Other Dev threads may work in the same repository. Before editing, check `t3_thr
 
 ## Plan
 
-Present the plan in this thread and accept it before implementation. Keep plan files out of the commit. Include:
+Present the plan in this thread and accept it before implementation. Write any plan file outside the checkout. Include:
 
 - the outcome in concrete terms and any assumptions;
 - the files, modules, APIs, and commands involved;
@@ -83,7 +83,7 @@ Screenshots are owned by the Dev thread at scores 1–2, the development agent a
 At scores 3–10 a fresh development agent may do steps 1–3; this thread does steps 4–6.
 
 1. Confirm the branch equals the signed-off commit, every commit is pushed, and the tree is clean.
-2. Write the body to a file outside the checkout per `../../references/factory/pr-writing.md`, with `## Screenshots` set to `Pending upload.` when images are planned. Create a ready (non-draft) PR, or reuse the one that already exists for the branch (`gh pr view factory/<slug>`):
+2. Write the body to a file outside the checkout per `../../references/factory/pr-writing.md`, with `## Screenshots` set to `Pending upload.` when images are planned. Create a ready (non-draft) PR, or reuse the one that already exists for the branch (`gh pr view factory/<slug> --repo <r>`):
    ```sh
    gh pr create --repo <r> --base <default branch> --head factory/<slug> --title "<title>" --body-file <file>
    ```
@@ -98,6 +98,10 @@ At scores 3–10 a fresh development agent may do steps 1–3; this thread does 
    ```
 
 Never merge, request reviewers, or change repository settings. If push or PR creation is blocked, leave the branch reviewable and report `BLOCKED` with the exact error.
+
+## Corrections
+
+The Dispatch thread may send a correction after the PR exists. Apply it on the same branch. Skip the baseline ancestor check. Fetch `origin factory/<slug>` and fast-forward to it (`git merge --ff-only FETCH_HEAD`), since a Resolve thread may have pushed. Plan, build, and validate the change at its own score. Push per "Pushing to a PR head" in `github.md`, update the PR body and screenshots, and report `DONE` again with clientRequestId `<slug>-done-<k>`. The Factory loop re-reviews the new head.
 
 ## Completion
 

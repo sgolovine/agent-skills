@@ -30,7 +30,7 @@ Implementation points a reviewer needs.
 Each command and its result. Each skipped check and why.
 
 ## Screenshots
-A Before/After table per scenario, or one line why none are needed, or the capture or upload blocker.
+A `Captured at <short head OID>` line and a Before/After table per scenario, or one line why none are needed, or the capture or upload blocker.
 
 ## Known gaps
 Limits and follow-ups. Omit the section if there are none.

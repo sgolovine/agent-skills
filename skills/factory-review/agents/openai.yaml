@@ -1,0 +1,4 @@
+interface:
+  display_name: "Factory Review"
+  short_description: "Tagged evidence-backed reviews of Factory PRs"
+  default_prompt: "Use $factory-review to review this Factory pull request at its pinned head, post a tagged COMMENT review with inline findings, and report the verdict to the Factory loop."

@@ -82,13 +82,15 @@ GitHub has no image-upload API. Use GitHub's own uploader in the signed-in T3 br
 
    <one sentence on what reviewers should notice>
 
+   Captured at `<short head OID>`.
+
    ### <scenario>
 
    | Before | After |
    | --- | --- |
    | <before image Markdown> | <after image Markdown> |
    ```
-   Use labeled images without a table for output that has no Before.
+   Use labeled images without a table for output that has no Before. The `Captured at` line names the commit the After images show; reviewers use it to detect stale screenshots.
 5. Reload the PR page. Confirm the description renders every image (count loaded `img` elements in the PR body with `naturalWidth > 0`) and take a snapshot.
 
 Each 60 000-character chunk is one tool call. Keep images small: capture the viewport, not the full page. If `pngquant` or `oxipng` is installed, compress before encoding.

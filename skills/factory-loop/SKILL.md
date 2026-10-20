@@ -33,9 +33,9 @@ Never call `t3_thread_wait`, `sleep`, or a polling loop, and never wait for a la
 Rebuild every pass; runs may be in a compacted or fresh context.
 
 - **GitHub:** list Factory PRs, checks, and review threads with the commands in `github.md`. Ignore PRs without the `factory` label.
-- **T3:** `t3_thread_list {titleContains:"Factory PR #<n> "}` (the trailing space keeps `#1` from matching `#12`), with `settled:false` and `settled:true`. A child is active while its status is `preparing`, `queued`, `starting`, `running`, or `waiting`. For each finished child not yet recorded, read its report line with `t3_thread_read {threadId, view:"messages"}`.
+- **T3:** `t3_thread_list {titleContains:"Factory #<n> "}` (the trailing space keeps `#1` from matching `#12`), with `settled:false` and `settled:true`. A child is active while its status is `preparing`, `queued`, `starting`, `running`, or `waiting`. For each finished child not yet recorded, read its report line with `t3_thread_read {threadId, view:"messages"}`.
 
-Titles are state: `Factory PR #<n> review r<round>` and `Factory PR #<n> resolve r<round>`, plus ` retry` for a relaunch. A title that exists, finished or not, was launched; never launch it again. The current Round is the highest review round for the PR; the next one is `r1` if none exists, else one higher. A Round has at most one Resolve thread, plus its retry.
+Titles are state: `Factory #<n> review r<round>` and `Factory #<n> resolve r<round>`, plus ` retry` for a relaunch. A title that exists, finished or not, was launched; never launch it again. The current Round is the highest review round for the PR; the next one is `r1` if none exists, else one higher. A Round has at most one Resolve thread, plus its retry.
 
 Keep a ledger in this thread as a cache: per PR the stage, round, current head, the review chain (each reviewed head, scope, verdict, findings), open items, active children, blockers already reported, and the next action. When it disagrees with GitHub or T3, trust GitHub and T3.
 
@@ -46,7 +46,7 @@ Evaluate in order. Stop at the first rule that launches, merges, or skips, then 
 1. **Active children.** Record and skip. For a `waiting` child, read `t3_pending_request_list {threadId}` and answer only within its brief. If you cannot, mark the PR blocked and `t3_thread_organize {action:"mark_unread", threadId}`.
 2. **Unprocessed reports.** Record each finished child's report. A review's `BLOCKED: head moved` is not a blocker; rule 4 reviews the new head. Any other `BLOCKED` report is a blocker until the head changes. A child that finished `failed`, `interrupted`, or `cancelled`, or without a parseable report line, gets one ` retry` at the current head. A failed retry is a blocker.
 3. **Draft.** Skip with stage `waiting: draft`. Never mark it ready; a draft Factory PR means a human is holding it.
-4. **Review needed.** No review reported `DONE` with `head=<headRefOid>`, or rule 5 starts a new Round. If a review of this head reported a `BLOCKED` other than head moved, report that blocker and skip. Round cap: if 5 reviews have already reported `DONE`, report the PR blocked with its open items and skip. Otherwise pin the head (`github.md`), launch `Factory PR #<n> review r<next round>` with the matching brief from `references/thread-briefs.md`, and skip.
+4. **Review needed.** No review reported `DONE` with `head=<headRefOid>`, or rule 5 starts a new Round. If a review of this head reported a `BLOCKED` other than head moved, report that blocker and skip. Round cap: if 5 reviews have already reported `DONE`, report the PR blocked with its open items and skip. Otherwise pin the head (`github.md`), launch `Factory #<n> review r<next round>` with the matching brief from `references/thread-briefs.md`, and skip.
    - **Full review** when no review reported `DONE`, or when the last reviewed head is not an ancestor of the pinned head (`git merge-base --is-ancestor <reviewed> <pinned>` fails after a force-push or rebase).
    - **Re-review** otherwise, with the previous findings, the threads, and the resolver's outcomes.
 5. **Open items** at the reviewed head:
@@ -55,7 +55,7 @@ Evaluate in order. Stop at the first rule that launches, merges, or skips, then 
    - checks in bucket `fail` or `cancel`;
    - `mergeable` `CONFLICTING`, or `mergeStateStatus` `DIRTY` or `BEHIND`.
 
-   If this Round has no Resolve thread and there are items, pin the head and launch `Factory PR #<n> resolve r<round>` with every item, then skip. If its Resolve thread already reported:
+   If this Round has no Resolve thread and there are items, pin the head and launch `Factory #<n> resolve r<round>` with every item, then skip. If its Resolve thread already reported:
    - Items it reported but could not close, or all items when it reported `BLOCKED`, are blockers.
    - Items it was never given (compare its brief, read with `t3_thread_read`): new comments, a human reply after its reply, later failures, a moved base. They start a new Round: launch that Round's re-review at the same head as in rule 4, then skip.
    - If it pushed nothing but closed any Factory finding as `rejected` or `already-fixed`, or reported `evidence=updated` (a fix made only in the PR body or screenshots), also start a new Round at the same head. That re-review checks those closures and the current PR body and screenshots before merge.
@@ -78,7 +78,7 @@ Failing checks, open comments, and conflicts are Resolve work, not reasons to wa
 
 Touch only what the Factory created for this PR.
 
-1. Archive with `t3_thread_organize {action:"archive", threadId}` every `Factory PR #<n> review` and `Factory PR #<n> resolve` thread, and the Dev thread whose `linkedPullRequest` is this PR, if one exists.
+1. Archive with `t3_thread_organize {action:"archive", threadId}` every `Factory #<n> review` and `Factory #<n> resolve` thread, and the Dev thread whose `linkedPullRequest` is this PR, if one exists.
 2. In the control checkout, find their worktrees with `git worktree list --porcelain`: branches `factory/review-<n>-*` and `factory/resolve-<n>-*`, and the Dev thread's `factory/<slug>` branch. Remove each with `git worktree remove <path>` only when `git -C <path> status --porcelain` is empty. Never pass `--force`. List dirty worktrees in the report and leave them.
 3. Delete the pin branches (`git for-each-ref --format='%(refname:short)' 'refs/heads/factory/pin-<n>-*'`) and the review and resolve branches of removed worktrees, with `git branch -D`.
 

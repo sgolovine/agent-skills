@@ -45,7 +45,7 @@ If GitHub's head for the PR no longer equals <head OID>, report BLOCKED: head mo
 
 The previous review (<previous review URL>) covered head <reviewed OID>. Review `git diff <reviewed OID> <head OID>` and the code it affects: callers, dependents, tests, and invariants the change alters. Treat unchanged files as covered. For merge commits from <base ref>, review only the conflict resolution (`git show --remerge-diff <merge SHA>`). If the affected area is most of the PR, do a full review and say so.
 
-Confirm each previous item is fixed, or that its rejection holds. Re-raise a rejection that does not hold as a new finding. Look for new issues the fixes introduced, and recheck the PR evidence:
+Confirm each previous item is fixed, or that its rejection holds. Re-raise a rejection that does not hold as a new finding. Look for new issues the fixes introduced, and recheck the PR evidence. If <reviewed OID> equals <head OID>, the resolver pushed nothing: there is no diff, so check each closure it made (`rejected`, `already-fixed`, or a fix in the PR body or screenshots) against the code and the current PR body and screenshots:
 <per previous item: id, author (Factory or human), URL, summary, resolver outcome and reply URL>
 
 Post one review with event COMMENT, <!-- factory-review --> in the body and every inline comment, and the scope stated in the body.

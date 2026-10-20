@@ -58,13 +58,13 @@ Evaluate in order. Stop at the first rule that launches, merges, or skips, then 
    If this Round has no Resolve thread and there are items, pin the head and launch `PR #<n> resolve r<round>` with every item, then skip. If its Resolve thread already reported:
    - Items it reported but could not close, or all items when it reported `BLOCKED`, are blockers.
    - Items it was never given (compare its brief, read with `t3_thread_read`): new comments, a human reply after its reply, later failures, a moved base. They start a new Round: launch that Round's re-review at the same head as in rule 4, then skip.
-   - If it pushed nothing and rejected any Factory finding, also start a new Round at the same head, so a re-review checks each rejection before merge.
+   - If it pushed nothing but closed any Factory finding as `rejected` or `already-fixed`, or reported `evidence=updated` (a fix made only in the PR body or screenshots), also start a new Round at the same head. That re-review checks those closures and the current PR body and screenshots before merge.
 
    Otherwise go to rule 6.
 6. **Wait.** If any check is `pending` or `mergeable` is `UNKNOWN`, mark the PR `waiting` and skip.
 7. **Merge gate.** Merge only when all hold:
    - `headRefOid` equals the head of the latest `DONE` review, and the chain is unbroken: a full review, then a review of every later change up to that head;
-   - that review was clean, or this Round's Resolve thread closed each of its findings as `fixed` or `already-fixed` and pushed nothing;
+   - that review was clean; a finding closed without a new commit counts only after a same-head re-review (rule 5) confirms it;
    - no review thread is unresolved;
    - every check is in bucket `pass` or `skipping`;
    - the PR has the `factory` label, `isDraft` is false, `mergeable` is `MERGEABLE`, `mergeStateStatus` is `CLEAN` (or `HAS_HOOKS`), and `reviewDecision` is not `CHANGES_REQUESTED`.

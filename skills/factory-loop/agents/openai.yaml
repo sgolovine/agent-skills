@@ -1,0 +1,4 @@
+interface:
+  display_name: "Factory Loop"
+  short_description: "Review, resolve, and merge Factory PRs"
+  default_prompt: "Use $factory-loop to run one non-blocking pass over this repository's factory-labeled PRs: launch review and resolve threads, re-review after fixes, and merge each PR that passes the merge gate."

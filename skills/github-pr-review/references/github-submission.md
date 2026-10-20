@@ -9,6 +9,7 @@ A concrete PR review is submitted by default under the authorization boundary in
 3. Choose the review event:
    - `COMMENT` by default, including for non-blocking feedback, no-findings results, or incomplete material coverage or verification.
    - `REQUEST_CHANGES` only for a verified blocking finding.
+   - Use `COMMENT` whenever the caller requires it, or when the authenticated user is the PR author. GitHub rejects `REQUEST_CHANGES` and `APPROVE` on your own PR.
    - `APPROVE` only when the user explicitly requested that decision, the reviewed head is current, all material files were covered, and no unresolved high-risk intent, CI, or validation gap remains.
 
 ## Summary-Only Review

@@ -19,6 +19,19 @@ gh label create factory --repo <r> --description "Reviewed and merged by the Fac
 
 Treat an "already exists" error as success. A Factory PR is an open PR with the `factory` label. Never add or remove the label on a PR you did not open.
 
+## Required approvals
+
+Factory reviews post `COMMENT`, so they never satisfy a required approval. Read the default branch's rules:
+
+```sh
+gh api repos/<r>/rules/branches/<default branch> \
+  --jq '[.[] | select(.type == "pull_request") | .parameters.required_approving_review_count] | max // 0'
+gh api repos/<r>/branches/<default branch>/protection \
+  --jq '.required_pull_request_reviews.required_approving_review_count // 0'
+```
+
+The first covers rulesets. The second covers classic protection; `404` means no protection, and `403` means the token cannot read it, so report it as unknown. A count above 0 means a human must approve every Factory PR before it merges. On a PR, `reviewDecision` `REVIEW_REQUIRED` means the same.
+
 ## Factory PRs and checks
 
 ```sh
@@ -44,6 +57,8 @@ gh api graphql --paginate --slurp -f owner=<o> -f repo=<name> -F number=<n> -f q
         pageInfo{ hasNextPage endCursor } } } } }'
 ```
 
+An unresolved thread stays an Open item even when `isOutdated` is true; its line changed, but its issue may remain. Resolve verifies it against the current code and replies like any other thread.
+
 If a thread's `totalCount` exceeds 100, fetch the rest before judging it:
 
 ```sh
@@ -61,7 +76,7 @@ All Factory writes post as the authenticated user (`gh api user --jq .login`), s
 - **Resolution reply:** written by the authenticated user, with a body that starts with `Factory resolution: <outcome>`, where `<outcome>` is `fixed`, `rejected`, `already-fixed`, `disputed`, or `unable-to-verify`.
 - **Human comment:** any other comment, including one from another login that copies the marker.
 
-A human thread is **waiting on a human** when it is unresolved and its last comment is a `Factory resolution: disputed` or `Factory resolution: unable-to-verify` reply. A human comment after that reply reopens it as an Open item.
+A thread is **waiting on a human** when it is unresolved and its last comment is a `Factory resolution: disputed` or `Factory resolution: unable-to-verify` reply. This covers human threads and Factory findings escalated after a second rejection (`factory-resolve`). A human comment after that reply reopens it as an Open item.
 
 ## Replies, resolution, and PR comments
 
@@ -122,4 +137,10 @@ gh pr merge <n> --repo <r> --match-head-commit <headRefOid> --merge    # else --
 gh pr view <n> --repo <r> --json state,mergeCommit                     # state must be MERGED
 ```
 
-Never pass `--auto` or `--admin`. Never bypass branch protection.
+Never pass `--auto` or `--admin`. Never bypass branch protection. Do not pass `--delete-branch`; it also touches local branches in the control checkout.
+
+After `MERGED`, delete the remote head branch only when `isCrossRepository` is false and `headRefName` starts with `factory/`. Leave other branches to their owners and the repository's auto-delete setting. A `422` means it is already gone.
+
+```sh
+gh api --method DELETE repos/<r>/git/refs/heads/<headRefName>
+```

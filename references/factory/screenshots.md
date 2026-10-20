@@ -4,7 +4,7 @@ Screenshots are PR evidence for changes with visible output: UI, rendered docs, 
 
 Capture and upload with the T3 built-in browser (preview tools). It shares the user's GitHub sign-in. Tabs belong to the thread that opens them. `<r>` is `owner/repo`.
 
-Verified on: <pending>
+Verified on: https://github.com/sgolovine/agent-skills/pull/4 (public repo)
 
 ## 1. Plan scenarios
 
@@ -40,43 +40,48 @@ Docs, CLI, and API output:
 GitHub has no image-upload API. Use GitHub's own uploader in the signed-in T3 browser. Never invent upload endpoints or image URLs.
 
 1. Open the PR page in the tab. Confirm sign-in: `preview_evaluate {tabId, expression:"document.querySelector('meta[name=\"user-login\"]')?.content"}` returns the user's login.
-2. Find the new-comment composer from page state (`preview_snapshot`, then list `textarea` elements with `id`, `name`, `aria-label`, `placeholder`). Note a selector that matches exactly one textarea.
+2. Find the new-comment composer from page state (`preview_snapshot`, then list `textarea` elements with `id`, `name`, `aria-label`, `placeholder`). Note a selector that matches exactly one textarea (`#new_comment_field` on PR pages). Do not type into it.
 3. For each PNG:
-   1. Encode and split locally:
+   1. Store the bytes in the repository as an unreferenced blob. Its SHA equals `git hash-object <png>`:
       ```sh
-      base64 -w0 <png> | fold -w 60000 > <png>.b64    # one chunk per line
-      wc -l < <png>.b64; sha256sum <png>
+      base64 -w0 <png> | jq -Rs '{encoding:"base64",content:.}' > <png>.json
+      gh api repos/<r>/git/blobs --input <png>.json --jq .sha    # <blob sha>
+      sha256sum <png>
       ```
-   2. Send each line `k` (`sed -n '<k>p' <png>.b64`) in its own call. Reset with the first chunk:
-      ```js
-      (window.__factoryUpload = '<chunk 1>', window.__factoryUpload.length)
-      (window.__factoryUpload += '<chunk k>', window.__factoryUpload.length)
+      Private repository: also wrap the blob in a parentless commit. Never create or update a ref:
+      ```sh
+      tree=$(jq -n --arg s '<blob sha>' '{tree:[{path:"<name>.png",mode:"100644",type:"blob",sha:$s}]}' \
+        | gh api repos/<r>/git/trees --input - --jq .sha)
+      jq -n --arg t "$tree" '{message:"screenshot transfer",tree:$t,parents:[]}' \
+        | gh api repos/<r>/git/commits --input - --jq .sha    # <commit sha>
       ```
-   3. In one evaluate, build the file, check its hash against `sha256sum`, and drop it on the composer:
+   2. In one evaluate, fetch the bytes, check the hash, drop the file on the composer, wait for the upload, and clear the composer. **Never submit the comment.** `<bytes>` is one of:
+      - Public repository: `Uint8Array.from(atob((await (await fetch('https://api.github.com/repos/<r>/git/blobs/<blob sha>')).json()).content.replace(/\n/g, '')), c => c.charCodeAt(0))`. Unauthenticated; 60 requests an hour.
+      - Private repository: `new Uint8Array(await (await fetch('/<r>/raw/<commit sha>/<name>.png')).arrayBuffer())`. Keep the default credentials; `credentials:'include'` fails on the redirect to `raw.githubusercontent.com`. Verified on a public repository only; private-repository behavior is unconfirmed.
       ```js
       (async () => {
         const ta = document.querySelector('<composer selector>');
-        const bytes = Uint8Array.from(atob(window.__factoryUpload), c => c.charCodeAt(0));
+        const bytes = <bytes>;
         const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))]
           .map(b => b.toString(16).padStart(2, '0')).join('');
-        const file = new File([bytes], '<NN-after-scenario>.png', { type: 'image/png' });
-        const dt = new DataTransfer(); dt.items.add(file);
+        if (hash !== '<sha256>') return { error: 'hash mismatch', hash, size: bytes.length };
+        const dt = new DataTransfer();
+        dt.items.add(new File([bytes], '<NN-after-scenario>.png', { type: 'image/png' }));
         ta.focus();
         for (const type of ['dragenter', 'dragover', 'drop'])
           ta.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: dt }));
-        window.__factoryUpload = '';
-        return { hash, size: file.size };
+        let tag;
+        for (let i = 0; i < 120 && !tag; i++) {
+          await new Promise(r => setTimeout(r, 500));
+          tag = ta.value.match(/<img [^>]*src="https:\/\/github\.com\/user-attachments\/assets\/[^"]+"[^>]*>|!\[[^\]]*\]\(https:\/\/github\.com\/user-attachments\/assets\/[^)]+\)/)?.[0];
+        }
+        Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(ta, '');
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
+        return { tag, cleared: ta.value === '' };
       })()
       ```
-      If the hash differs, resend the chunks. If no upload starts, retry with a `paste` event (`new ClipboardEvent('paste', {bubbles:true, cancelable:true, clipboardData: dt})`). As a last resort, set `.files = dt.files` on the composer's `input[type=file]` and dispatch a bubbling `change` event.
-   4. Wait for the upload in one evaluate that returns a Promise polling `ta.value` every 500 ms for up to 60 s. Done means the value contains an `https://github.com/user-attachments/assets/` URL (Markdown `![...](...)` or `<img ... src="...">`) and no `Uploading` placeholder. Record that image Markdown for the file.
-   5. Clear the composer so React sees it, and **never submit the comment**:
-      ```js
-      (() => { const ta = document.querySelector('<composer selector>');
-        Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(ta, '');
-        ta.dispatchEvent(new Event('input', { bubbles: true })); return ta.value.length; })()
-      ```
-4. Write the image Markdown into the body file's `## Screenshots` section and apply it with `gh pr edit <n> --repo <r> --body-file <file>`:
+      Uploads take about 1–2 s. An `Uploading` placeholder may never appear, so wait for the `user-attachments` URL. GitHub inserts an `<img width=".." height=".." alt=".." src="https://github.com/user-attachments/assets/<uuid>" />` tag; record it as returned. If `tag` is empty, retry with a `paste` event (`new ClipboardEvent('paste', {bubbles:true, cancelable:true, clipboardData: dt})`), then by setting `.files = dt.files` on the composer's `input[type=file]` and dispatching a bubbling `change` event. If the fetch fails or the hash differs, the upload is a blocker (§5).
+4. Write the image tags into the body file's `## Screenshots` section and apply it with `gh pr edit <n> --repo <r> --body-file <file>`:
    ```markdown
    ## Screenshots
 
@@ -88,12 +93,10 @@ GitHub has no image-upload API. Use GitHub's own uploader in the signed-in T3 br
 
    | Before | After |
    | --- | --- |
-   | <before image Markdown> | <after image Markdown> |
+   | <before img tag> | <after img tag> |
    ```
    Use labeled images without a table for output that has no Before. The `Captured at` line names the commit the After images show; reviewers use it to detect stale screenshots.
 5. Reload the PR page. Confirm the description renders every image (count loaded `img` elements in the PR body with `naturalWidth > 0`) and take a snapshot.
-
-Each 60 000-character chunk is one tool call. Keep images small: capture the viewport, not the full page. If `pngquant` or `oxipng` is installed, compress before encoding.
 
 ## 5. Failure and cleanup
 

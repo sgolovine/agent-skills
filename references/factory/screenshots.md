@@ -4,8 +4,6 @@ Screenshots are PR evidence for changes with visible output: UI, rendered docs, 
 
 Capture and upload with the T3 built-in browser (preview tools). It shares the user's GitHub sign-in. Tabs belong to the thread that opens them. `<r>` is `owner/repo`.
 
-Verified on: https://github.com/sgolovine/agent-skills/pull/4 (public repo)
-
 ## 1. Plan scenarios
 
 For each scenario record the route or command, state, viewport, and color scheme. UI changes get comparable Before/After pairs. Docs, CLI, and API changes get the rendered output, with a Before when it shows the change. Choose the smallest set that shows every visible change.
@@ -42,26 +40,23 @@ GitHub has no image-upload API. Use GitHub's own uploader in the signed-in T3 br
 1. Open the PR page in the tab. Confirm sign-in: `preview_evaluate {tabId, expression:"document.querySelector('meta[name=\"user-login\"]')?.content"}` returns the user's login.
 2. Find the new-comment composer from page state (`preview_snapshot`, then list `textarea` elements with `id`, `name`, `aria-label`, `placeholder`). Note a selector that matches exactly one textarea (`#new_comment_field` on PR pages). Do not type into it.
 3. For each PNG:
-   1. Store the bytes in the repository as an unreferenced blob. Its SHA equals `git hash-object <png>`:
+   1. Store the bytes in the repository as a blob wrapped in a parentless commit. Never create or update a ref:
       ```sh
       base64 -w0 <png> | jq -Rs '{encoding:"base64",content:.}' > <png>.json
       gh api repos/<r>/git/blobs --input <png>.json --jq .sha    # <blob sha>
       sha256sum <png>
-      ```
-      Private repository: also wrap the blob in a parentless commit. Never create or update a ref:
-      ```sh
       tree=$(jq -n --arg s '<blob sha>' '{tree:[{path:"<name>.png",mode:"100644",type:"blob",sha:$s}]}' \
         | gh api repos/<r>/git/trees --input - --jq .sha)
       jq -n --arg t "$tree" '{message:"screenshot transfer",tree:$t,parents:[]}' \
         | gh api repos/<r>/git/commits --input - --jq .sha    # <commit sha>
       ```
-   2. In one evaluate, fetch the bytes, check the hash, drop the file on the composer, wait for the upload, and clear the composer. **Never submit the comment.** `<bytes>` is one of:
-      - Public repository: `Uint8Array.from(atob((await (await fetch('https://api.github.com/repos/<r>/git/blobs/<blob sha>')).json()).content.replace(/\n/g, '')), c => c.charCodeAt(0))`. Unauthenticated; 60 requests an hour.
-      - Private repository: `new Uint8Array(await (await fetch('/<r>/raw/<commit sha>/<name>.png')).arrayBuffer())`. Keep the default credentials; `credentials:'include'` fails on the redirect to `raw.githubusercontent.com`. Verified on a public repository only; private-repository behavior is unconfirmed.
+   2. In one evaluate, fetch the bytes through GitHub's same-origin raw route, check the hash, drop the file on the composer, wait for the upload, and clear the composer. **Never submit the comment.** Keep the default fetch credentials; `credentials:'include'` fails on the redirect to `raw.githubusercontent.com`. The route works on public repositories; on a private repository it is unconfirmed, so treat a non-OK status there as an upload blocker that names the status.
       ```js
       (async () => {
         const ta = document.querySelector('<composer selector>');
-        const bytes = <bytes>;
+        const res = await fetch('/<r>/raw/<commit sha>/<name>.png');
+        if (!res.ok) return { error: `fetch ${res.status} ${res.statusText}`, url: res.url };
+        const bytes = new Uint8Array(await res.arrayBuffer());
         const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))]
           .map(b => b.toString(16).padStart(2, '0')).join('');
         if (hash !== '<sha256>') return { error: 'hash mismatch', hash, size: bytes.length };
@@ -103,3 +98,5 @@ GitHub has no image-upload API. Use GitHub's own uploader in the signed-in T3 br
 If capture or upload fails, still open or keep the PR. Keep the captures. Write the exact blocker in `## Screenshots` (what failed, at which step, what was tried). Report it. Do not post local paths.
 
 Close every tab you opened with `t3_preview_close {tabId}`. Stop the processes you started and remove temporary worktrees.
+
+The transfer leaves a blob, a tree, and a commit with no ref in the repository. The API cannot delete them. GitHub may garbage-collect them later, but until then anyone with read access can fetch them by SHA; on a public repository that is anyone. Upload only images you would post publicly, and name the transfer commit SHAs in the run notes so the user can ask GitHub Support to purge them.

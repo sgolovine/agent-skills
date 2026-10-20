@@ -101,6 +101,6 @@ Send the Dispatch thread only merges and blockers, once per event, with `t3_thre
 | Event | `message` | `clientRequestId` |
 | --- | --- | --- |
 | Merge | `[factory-loop] MERGED: PR #<n> <title> <merge SHA>` | `factory-loop-merged-pr-<n>` |
-| Blocker | `[factory-loop] BLOCKED: PR #<n> <reason>` | `factory-loop-blocked-pr-<n>-<short-oid>-<reason slug>` |
+| Blocker | `[factory-loop] BLOCKED: PR #<n> <reason>` | `factory-loop-blocked-pr-<n>-r<round>-<short-oid>-<reason slug>` |
 
 Record each sent report in the ledger and do not resend it.

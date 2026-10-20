@@ -1,6 +1,6 @@
 ---
 name: factory-loop
-description: Run one non-blocking Factory pass from T3 Code over a repository's open `factory`-labeled PRs: launch factory-review and factory-resolve threads, re-review after fixes, and merge each PR once review is clean, checks pass, and no conflicts or open threads remain. Use when invoked by the Factory schedule or factory-start.
+description: "Run one non-blocking Factory pass from T3 Code over a repository's open `factory`-labeled PRs: launch factory-review and factory-resolve threads, re-review after fixes, and merge each PR once review is clean, checks pass, and no conflicts or open threads remain. Use when invoked by the Factory schedule or factory-start."
 ---
 
 # Factory Loop
@@ -46,7 +46,7 @@ Evaluate in order. Stop at the first rule that launches, merges, or skips, then 
 1. **Active children.** Record and skip. For a `waiting` child, read `t3_pending_request_list {threadId}`; answer only within its brief. Otherwise mark the PR blocked and `t3_thread_organize {action:"mark_unread", threadId}`.
 2. **Unprocessed reports.** Record each finished child's report. A review's `BLOCKED: head moved` is not a blocker; rule 4 reviews the new head. A child that finished `failed`, `interrupted`, or `cancelled`, or without a parseable report line, gets one ` retry` at the current head. A failed retry is a blocker.
 3. **Draft.** Skip with stage `waiting: draft`. Never mark it ready; a draft Factory PR means a human is holding it.
-4. **Review needed.** No finished review covers `headRefOid`, or rule 5 starts a new Round. If 5 reviews have already reported `DONE`, mark the PR blocked with its open items. Otherwise pin the head (`github.md`), launch `PR #<n> review r<next round>` with the matching brief from `references/thread-briefs.md`, and skip.
+4. **Review needed.** No review reported `DONE` with `head=<headRefOid>`, or rule 5 starts a new Round. Round cap: if 5 reviews have already reported `DONE`, mark the PR blocked with its open items. Otherwise pin the head (`github.md`), launch `PR #<n> review r<next round>` with the matching brief from `references/thread-briefs.md`, and skip.
    - **Full review** when no review reported `DONE`, or when the last reviewed head is not an ancestor of the pinned head (`git merge-base --is-ancestor <reviewed> <pinned>` fails after a force-push or rebase).
    - **Re-review** otherwise, with the previous findings, the threads, and the resolver's outcomes.
 5. **Open items** at the reviewed head:

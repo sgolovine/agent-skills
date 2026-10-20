@@ -59,7 +59,7 @@ Present the plan in this thread and accept it before implementation. Write any p
 - whether the change has visible output (UI, rendered docs, CLI output, API responses). If so, the screenshot scenarios per `../../references/factory/screenshots.md`; if not, the one-line reason;
 - risks, migrations, or compatibility notes when relevant.
 
-Capture Before images at the start SHA before UI behavior changes.
+Capture Before images per Runtime in `../../references/factory/screenshots.md`.
 
 ## Implement
 

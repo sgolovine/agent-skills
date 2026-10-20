@@ -28,7 +28,7 @@ gh pr view <n> --repo <r> --json number,url,title,body,baseRefName,baseRefOid,he
 gh pr checks <n> --repo <r> --json name,bucket,state,link
 ```
 
-Never pass `--required` to `gh pr checks`; it exits 1 when the branch has no required checks. Buckets: `pass`, `skipping`, `pending`, `fail`, `cancel`.
+Never pass `--required` to `gh pr checks`; it exits 1 when the branch has no required checks. Buckets: `pass`, `skipping`, `pending`, `fail`, `cancel`. A branch with no checks at all makes `gh pr checks` exit 1 with `no checks reported on the '<branch>' branch`, even with `--json`; treat that as zero checks, none pending or failing.
 
 ## Review threads
 

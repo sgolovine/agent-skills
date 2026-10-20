@@ -16,7 +16,7 @@ Keep all captures in a run directory outside every checkout, such as `${TMPDIR:-
 
 - Reuse a running app only after proving it serves the right revision: check the process working directory, command, and build provenance, not just a responding port (`ss -ltnp`, `ps`, `docker compose ps`).
 - Otherwise start it from the worktree with the repository's documented command and lockfile-aware install. Start only what is missing. Use a free port. Keep logs outside the checkout. Record the PIDs, ports, and containers you start.
-- Before images come from the base revision. Create a temporary detached worktree on another port; never reset the dev worktree:
+- Before images come from the base revision. If you capture them before editing, the Dev thread's own worktree at the start SHA serves. Otherwise create a temporary detached worktree at the start or base SHA on another port; never reset the dev worktree:
   ```sh
   git -C <worktree> worktree add --detach <run-dir>/base <base-sha>
   ```

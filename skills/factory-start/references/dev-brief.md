@@ -6,7 +6,7 @@ Send the whole brief as the `message` of `t3_thread_launch`. The Dev thread cann
 You are Dev thread <slug> for the Factory on <repo URL>, in T3 project <projectId>.
 Dispatch thread: <Dispatch threadId>. The user is not watching this thread.
 
-Run /factory-dev.
+Run /factory-dev (in Codex: $factory-dev).
 
 ## Assignment
 Outcome: <what done looks like>

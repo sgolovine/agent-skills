@@ -59,7 +59,7 @@ Report to the Factory loop (thread <loop threadId>) with exactly one of:
 ## Resolve brief
 
 ```
-Run /factory-resolve on <PR URL>. Round <round>.
+Run /factory-resolve on <PR URL> (in Codex: $factory-resolve). Round <round>.
 
 <workspace block>
 Head repository: <head repository>, head ref: <head ref>, base ref: <base ref>.

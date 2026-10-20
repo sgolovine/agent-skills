@@ -5,13 +5,13 @@ description: Review a Factory pull request for correctness, regressions, securit
 
 # Factory Review
 
-Review the change in context, not just the patch. Report only actionable issues the PR introduces, each with a concrete failure and verifiable impact. Post one `COMMENT` review whose every part carries `<!-- factory-review -->`, then report to the Factory loop. You never edit files, push, approve, or request changes.
+Review the change in context, not just the patch. Report only actionable issues the PR introduces, each with a concrete failure and verifiable impact. Post one `COMMENT` review whose every part carries `<!-- factory-review -->`, then report. You never edit files, push, approve, or request changes.
 
 ## Requirements
 
 - T3 Code. Read `shared/factory/t3.md` for tool names on this harness (Claude Code or Codex). If T3 is absent, report `factory-review requires T3 Code.` and stop.
 - `gh` authenticated (`gh auth status --hostname <host>`). Read `shared/factory/github.md`; `<r>` is `owner/repo`.
-- The loop's brief gives the PR URL, round, pinned head OID, scope, and the loop thread id. For a re-review it also gives the last reviewed OID, the previous review URL, and the previous items with each resolver outcome. Invoked directly, do a full review of the current head and report in this thread.
+- The Factory loop runs you as a delegated task. Its brief gives the PR URL, round, pinned head OID, scope, and a detached worktree path. Your working directory is the loop's control checkout: run every command in the worktree and never touch the control checkout. For a re-review the brief also gives the last reviewed OID, the previous review URL, and the previous items with each resolver outcome. Invoked directly, do a full review of the current head in your own checkout and report in this thread.
 
 ## Safety
 
@@ -69,7 +69,7 @@ The review body holds, in order: `Round <round>, scope <full|re-review>`, the re
 
 ## Report
 
-Send exactly one line with the reporting block from `t3.md`, tag `[pr-<n>-review-r<round>]`:
+End your final answer with exactly one line, tag `[pr-<n>-review-r<round>]`. As a delegated task, your final answer reaches the loop automatically; do not message it with `t3_thread_send`.
 
 ```
 [pr-<n>-review-r<round>] DONE: verdict=clean|findings scope=full|re-review head=<oid> review=<review URL> findings=<count>; <per finding: f<k>, severity, file:line, summary, inline comment URL or "unanchored">

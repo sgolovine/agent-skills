@@ -1,6 +1,6 @@
 ---
 name: factory-loop
-description: "Run one non-blocking Factory pass from T3 Code over a repository's open `factory`-labeled PRs on a cheap pickup model: launch factory-review and factory-resolve threads on stronger models, re-review after fixes, and merge each PR once review is clean, checks pass, and no conflicts or open threads remain. Use when invoked by the Factory schedule or factory-start, or for a dry run."
+description: "Run one non-blocking Factory pass from T3 Code over a repository's open `factory`-labeled PRs on a cheap pickup model: delegate factory-review tasks and launch factory-resolve threads on stronger models, re-review after fixes, and merge each PR once review is clean, checks pass, and no conflicts or open threads remain. Use when invoked by the Factory schedule or factory-start, or for a dry run."
 ---
 
 # Factory Loop
@@ -13,14 +13,14 @@ You are the Factory loop, a cheap pickup thread. Each pass you rebuild state, la
 - `gh` and `jq`, with `gh` authenticated with permission to merge. Read `shared/factory/github.md`; `<r>` is `owner/repo`.
 - Children need the `factory-review` and `factory-resolve` skills; a child that cannot load its skill reports a blocker.
 - This thread runs at the project root, which is the control checkout. Require `gh repo view` there to match the repo URL. Never edit or switch branches in it; only fetch pins and manage worktrees.
-- This thread runs on the Loop tier in `t3.md` (for example `gpt-6-luna`, reasoning `low`). Scheduled runs use this thread's model. On a Run message, if `t3_thread_configuration {}` shows another model and the user did not choose it, switch with `t3_thread_configure {modelSelection}`; it applies from the next run.
+- This thread runs on the Loop tier in `t3.md` (for example `gpt-6-luna`, reasoning `low`). Scheduled runs use this thread's model. On a Run message, if `t3_thread_configuration {}` shows another model of the same provider and the user did not choose it, switch with `t3_thread_configure {modelSelection}`; it applies from the next run. Never switch provider in place; `factory-start` replaces a loop thread on another provider.
 
 ## Invocation
 
 - **Run message:** `Run /factory-loop for <repo URL>. Dispatch thread: <threadId>.` or `Run /factory-loop for <repo URL>. Report merges and blockers to the Dispatch thread <threadId>.` Record the repo and the Dispatch thread, do Monitor, then a pass.
-- **Child report** (`[pr-<n>-review-r<round>] ...` or `[pr-<n>-resolve-r<round>] ...`): if the ledger already records it, an earlier pass drained it; reply `Recorded.` and end the turn. Otherwise do a pass. If `list_scheduled_tasks` shows no Factory schedule for this repo, the Factory is stopped: record the report and launch nothing.
+- **Child report**: a Resolve thread's `[pr-<n>-resolve-r<round>] ...` message, or a review task's completion notification, whose result ends with a `[pr-<n>-review-r<round>] ...` line. If the ledger already records it, an earlier pass drained it; reply `Recorded.` and end the turn. Otherwise do a pass. If `list_scheduled_tasks` shows no Factory schedule for this repo, the Factory is stopped: record the report and launch nothing.
 - **Dry run** (`Dry run /factory-loop for <repo URL>.`, optionally with PR numbers): rebuild state, passing any PR numbers to the state script so unlabeled PRs are included. Evaluate the decision list and report the action each PR would take. Pin, launch, send, merge, schedule, and clean up nothing.
-- **Stop message** (`Stop the Factory for <repo URL>.`): this thread owns the schedule. Delete this repo's Factory schedule, launch nothing more, and confirm in this thread and to the Dispatch thread. Running children finish on their own. A later Run message resumes from GitHub and T3 state.
+- **Stop message** (`Stop the Factory for <repo URL>.`): this thread owns the schedule. Delete this repo's Factory schedule if it still exists, launch nothing more, and confirm in this thread and to the Dispatch thread. Running review tasks and Resolve threads finish on their own. (Pressing Stop on this thread in T3 also stops its review tasks; the next Run retries them.) A later Run message resumes from GitHub and T3 state.
 
 ## A pass
 
@@ -35,7 +35,7 @@ Never call `t3_thread_wait`, `sleep`, or a polling loop, and never wait for a la
 Rebuild every pass; runs may be in a compacted or fresh context.
 
 - **GitHub:** run `scripts/factory-state.sh <r>` from this skill's folder. It prints each open `factory` PR, oldest first, with its merge fields, check buckets and failing checks, unresolved review threads (item id, Factory or human, outdated, waiting on a human), a per-PR fingerprint, and a repo fingerprint. Fetch other fields with the commands in `github.md` only when a rule needs them.
-- **T3:** two calls cover every PR: `t3_thread_list {titleContains:"Factory #", settled:false}` and the same with `settled:true`, following `cursor`. Group threads by the title prefix `Factory #<n> ` (the trailing space keeps `#1` from matching `#12`). A child is active while its status is `preparing`, `queued`, `starting`, `running`, or `waiting`. For each finished child not yet recorded, read its report line with `t3_thread_read {threadId, view:"messages"}`.
+- **T3:** two calls cover every PR: `t3_thread_list {titleContains:"Factory #", settled:false}` and the same with `settled:true`, following `cursor`. They return Resolve threads and review tasks (`relationshipToParent:"subagent"`) alike. Group them by the title prefix `Factory #<n> ` (the trailing space keeps `#1` from matching `#12`). A child is active while its status is `preparing`, `queued`, `starting`, `running`, or `waiting`. For each finished child not yet recorded, read its report line with `t3_thread_read {threadId, view:"messages"}`: the last message of a review task's thread, or the message a Resolve thread sent. This works for review tasks that an earlier loop thread launched; `task_status` works only for this thread's own tasks.
 - **No change:** the repo fingerprint equals the ledger's, every child's status equals the ledger's, and no finished child is unrecorded.
 
 Titles are state: `Factory #<n> review r<round>` and `Factory #<n> resolve r<round>`, plus ` retry` for a relaunch. A title that exists, finished or not, was launched; never launch it again. The current Round is the highest review round for the PR; the next one is `r1` if none exists, else one higher. A Round has at most one Resolve thread, plus its retry.
@@ -48,10 +48,10 @@ Report formats belong to the child skills: parse review reports per the Report s
 
 Evaluate in order. Stop at the first rule that launches, merges, or skips, then go to the next PR.
 
-1. **Active children.** Record and skip. For a `waiting` child, read `t3_pending_request_list {threadId}` and answer only within its brief. If you cannot, mark the PR blocked, `t3_thread_organize {action:"mark_unread", threadId}`, and report the question to the Dispatch thread once so the user can answer in that thread.
-2. **Unprocessed reports.** Record each finished child's report. A review's `BLOCKED: head moved` is not a blocker; rule 4 reviews the new head. Any other `BLOCKED` report is a blocker until the head changes, rule 5 starts a new Round, or rule 5 finds it no longer open on GitHub. A child that finished `failed`, `interrupted`, or `cancelled`, or without a parseable report line, gets one ` retry` at the current head. A failed retry is a blocker.
+1. **Active children.** Record and skip. For a `waiting` child, read `t3_pending_request_list {threadId}`. Answer a question only within its brief. Never approve a permission request; agents cannot. If you cannot answer, mark the PR blocked, `t3_thread_organize {action:"mark_unread", threadId}`, and report the request to the Dispatch thread once so the user can handle it.
+2. **Unprocessed reports.** Record each finished child's report. A review's `BLOCKED: head moved` is not a blocker; rule 4 reviews the new head. Any other `BLOCKED` report is a blocker until the head changes, rule 5 starts a new Round, or rule 5 finds it no longer open on GitHub. A child that finished `failed`, `cancelled`, or `rolled_back`, or `completed` without a parseable report line, gets one ` retry` at the current head. A child that is `interrupted` may continue on its own after a restart or a usage-limit reset: read its last activity (`t3_thread_read {threadId, view:"activity", limit:5}`). If it hit a usage limit, mark the PR `waiting: usage limit` and skip. Otherwise retry it only if it is still `interrupted` on a later pass. A failed retry is a blocker.
 3. **Draft.** Skip with stage `waiting: draft`. Never mark it ready; a draft Factory PR means a human is holding it.
-4. **Review needed.** No review reported `DONE` with `head=<headRefOid>`, or rule 5 starts a new Round. If a review of this head reported a `BLOCKED` other than head moved, report that blocker and skip. Apply the round cap (below). Otherwise pin the head (`github.md`), launch `Factory #<n> review r<next round>` with the matching brief from `references/thread-briefs.md`, and skip.
+4. **Review needed.** No review reported `DONE` with `head=<headRefOid>`, or rule 5 starts a new Round. If a review of this head reported a `BLOCKED` other than head moved, report that blocker and skip. Apply the round cap (below). Otherwise pin the head (`github.md`), create the review worktree, delegate `Factory #<n> review r<next round>` with the matching brief from `references/thread-briefs.md`, and skip.
    - **Full review** when no review reported `DONE`, or when the last reviewed head is not an ancestor of the pinned head (`git merge-base --is-ancestor <reviewed> <pinned>` fails after a force-push or rebase).
    - **Re-review** otherwise, with the previous findings, the threads, and the resolver's outcomes.
 5. **Open items** at the reviewed head:
@@ -86,9 +86,9 @@ Failing checks, open comments, and conflicts are Resolve work, not reasons to wa
 Touch only what the Factory created for this PR.
 
 1. Delete the remote head branch per `github.md` (only same-repository `factory/` branches).
-2. Archive with `t3_thread_organize {action:"archive", threadId}` every `Factory #<n> review` and `Factory #<n> resolve` thread, and the Dev thread whose `linkedPullRequest` is this PR, if one exists.
-3. In the control checkout, find their worktrees with `git worktree list --porcelain`: branches `factory/review-<n>-*` and `factory/resolve-<n>-*`, and the Dev thread's `factory/<slug>` branch. Remove each with `git worktree remove <path>` only when `git -C <path> status --porcelain` is empty. Never pass `--force`. List dirty worktrees in the report and leave them.
-4. Delete the pin branches (`git for-each-ref --format='%(refname:short)' 'refs/heads/factory/pin-<n>-*'`) and the review and resolve branches of removed worktrees, with `git branch -D`.
+2. Archive with `t3_thread_organize {action:"archive", threadId}` every `Factory #<n> resolve` thread, and the Dev thread whose `linkedPullRequest` is this PR, if one exists. Review tasks stay under this thread as subagents.
+3. In the control checkout, find the worktrees with `git worktree list --porcelain`: detached worktrees at `<worktrees dir>/factory-review-<n>-*`, branches `factory/resolve-<n>-*`, and the Dev thread's `factory/<slug>` branch. Review checks may leave build outputs, so for a review worktree whose tracked files are unchanged (`git -C <path> diff --quiet HEAD`), run `git -C <path> clean -fd` first. Then remove each worktree with `git worktree remove <path>` only when `git -C <path> status --porcelain` is empty. Never pass `--force`. List dirty worktrees in the report and leave them.
+4. Delete the pin branches (`git for-each-ref --format='%(refname:short)' 'refs/heads/factory/pin-<n>-*'`) and the resolve branches of removed worktrees, with `git branch -D`.
 
 Never link PRs to this thread; T3 settles a thread when its linked PR merges.
 

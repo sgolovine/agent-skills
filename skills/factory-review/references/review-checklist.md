@@ -1,6 +1,6 @@
 # Factory review checklist
 
-Apply only the lenses that fit the change. Always apply the PR evidence lens. Placeholders (`<r>`, `<o>`, `<name>`, `<n>`) follow `../../../references/factory/github.md`.
+Apply only the lenses that fit the change. Always apply the PR evidence lens. Placeholders (`<r>`, `<o>`, `<name>`, `<n>`) follow `../shared/factory/github.md`.
 
 ## Finding Admission Test
 
@@ -68,7 +68,7 @@ Reject pre-existing defects, hypothetical concerns without a plausible trigger, 
 
 Report these as unanchored findings, usually `P3`; use `P2` when the description misstates behavior a reviewer or user relies on.
 
-- **Description missing or stale:** the body lacks `## Summary`, `## Changes`, or `## Validation` per `../../../references/factory/pr-writing.md`, or it no longer matches the diff at this head.
+- **Description missing or stale:** the body lacks `## Summary`, `## Changes`, or `## Validation` per `../shared/factory/pr-writing.md`, or it no longer matches the diff at this head.
 - **Screenshots missing:** the change has visible output (UI, rendered docs, CLI output, API responses) and `## Screenshots` has no images, or states a capture or upload blocker.
 - **Screenshots stale:** commits after the screenshots' head change the visible behavior they show. Read the `Captured at <short head OID>` line in `## Screenshots` and inspect `git diff <captured OID> HEAD` for visible changes. If the line is missing, compare the body's `lastEditedAt` (or `createdAt`) with the commit dates:
   ```sh

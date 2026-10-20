@@ -9,8 +9,8 @@ You are the supervisor of one Dev thread. Score the task, then research, plan, b
 
 ## Requirements
 
-- T3 Code. Read `../../references/factory/t3.md`. If T3 is absent, report `factory-dev requires T3 Code.` and stop.
-- `gh` authenticated with push and PR rights. Read `../../references/factory/github.md`; `<r>` is `owner/repo`.
+- T3 Code. Read `shared/factory/t3.md`. If T3 is absent, report `factory-dev requires T3 Code.` and stop.
+- `gh` authenticated with push and PR rights. Read `shared/factory/github.md`; `<r>` is `owner/repo`.
 - The brief gives the outcome, scope, acceptance criteria, task slug, default branch, and the Dispatch thread id. Invoked directly by a user, ask only questions that would change the result, and report in this thread instead.
 
 ## Baseline
@@ -19,7 +19,7 @@ The Dev thread is already an isolated worktree on `factory/<slug>`, created from
 
 1. Run `git status --short --branch`, `git remote -v`, and `git worktree list`. Require a clean tree on `factory/<slug>`.
 2. `git fetch --prune origin`. Require `HEAD` to be an ancestor of `origin/<default branch>`. Record `HEAD` as the start SHA.
-3. Outside such a worktree (a user invoked you directly), apply `../../references/worktrees.md` with start point `origin/<default branch>` and branch `factory/<slug>`, and work only there.
+3. Outside such a worktree (a user invoked you directly), apply `shared/worktrees.md` with start point `origin/<default branch>` and branch `factory/<slug>`, and work only there.
 
 ## Score and allocate
 
@@ -33,7 +33,7 @@ Before any repository work, score the task 1–10 by scope, uncertainty, risk, a
 | 6–10 | A research agent unless findings already exist, a development agent, and a validation agent (also captures screenshots). |
 
 - Add a planning agent at any score from 3 when no actionable plan with acceptance criteria exists; otherwise the development role plans. Add other agents only for a stated need.
-- Delegate with the delegation block in `../../references/factory/t3.md`, or native subagents that support the chosen model. Use the newest Opus unless the brief names a model.
+- Delegate with the delegation block in `shared/factory/t3.md`, or native subagents that support the chosen model. Use the newest Opus unless the brief names a model.
 - Give every agent a fresh assignment: the request, its role and scope, repository instructions, worktree path, branch, start SHA, the accepted plan or predecessor findings, acceptance criteria, and the return shape. Never reuse a session for a new assignment, correction, or revalidation.
 - Keep the stage order: research → plan → development → validation. Accept each stage before the next starts. Parallelize only independent work. One writer at a time in the worktree.
 
@@ -56,10 +56,10 @@ Present the plan in this thread and accept it before implementation. Write any p
 - the files, modules, APIs, and commands involved;
 - ordered implementation steps;
 - acceptance criteria and the evidence that proves each one (tests, commands, manual checks);
-- whether the change has visible output (UI, rendered docs, CLI output, API responses). If so, the screenshot scenarios per `../../references/factory/screenshots.md`; if not, the one-line reason;
+- whether the change has visible output (UI, rendered docs, CLI output, API responses). If so, the screenshot scenarios per `shared/factory/screenshots.md`; if not, the one-line reason;
 - risks, migrations, or compatibility notes when relevant.
 
-Capture Before images per Runtime in `../../references/factory/screenshots.md`.
+Capture Before images per Runtime in `shared/factory/screenshots.md`.
 
 ## Implement
 
@@ -83,14 +83,14 @@ Screenshots are owned by the Dev thread at scores 1–2, the development agent a
 At scores 3–10 a fresh development agent may do steps 1–3; this thread does steps 4–6.
 
 1. Confirm the branch equals the signed-off commit, every commit is pushed, and the tree is clean.
-2. Write the body to a file outside the checkout per `../../references/factory/pr-writing.md`, with `## Screenshots` set to `Pending upload.` when images are planned. Create a ready (non-draft) PR, or reuse the one that already exists for the branch (`gh pr view factory/<slug> --repo <r>`):
+2. Write the body to a file outside the checkout per `shared/factory/pr-writing.md`, with `## Screenshots` set to `Pending upload.` when images are planned. Create a ready (non-draft) PR, or reuse the one that already exists for the branch (`gh pr view factory/<slug> --repo <r>`):
    ```sh
    gh pr create --repo <r> --base <default branch> --head factory/<slug> --title "<title>" --body-file <file>
    ```
-3. Upload the screenshots into the PR body per `../../references/factory/screenshots.md`. If capture or upload fails, write the blocker in `## Screenshots` and keep going.
+3. Upload the screenshots into the PR body per `shared/factory/screenshots.md`. If capture or upload fails, write the blocker in `## Screenshots` and keep going.
 4. Add the label last, so the Factory loop sees only a finished PR: `gh pr edit <n> --repo <r> --add-label factory`.
 5. `link_pull_request {url:"<PR URL>"}` from this thread.
-6. Report to the Dispatch thread with the reporting block from `../../references/factory/t3.md` and tag `[<slug>]`:
+6. Report to the Dispatch thread with the reporting block from `shared/factory/t3.md` and tag `[<slug>]`:
    ```
    [<slug>] DONE: pr=<PR URL> head=<oid> checks=<command: result, ...> screenshots=<uploaded|none: reason|blocked: reason>; <known gaps or none>
    [<slug>] BLOCKED: <blocker, what you tried, what you need>

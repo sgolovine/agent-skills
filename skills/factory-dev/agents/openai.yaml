@@ -1,4 +1,0 @@
-interface:
-  display_name: "Factory Dev"
-  short_description: "Build one Factory task through a ready PR"
-  default_prompt: "Use $factory-dev to score this task, supervise fresh subagents through research, planning, development, and validation in this worktree, capture screenshots for visible changes, and open a ready factory-labeled PR."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Factory Start"
-  short_description: "Start the Factory and dispatch dev work"
-  default_prompt: "Use $factory-start to start or reuse this repository's Factory loop and make this thread the Dispatch thread that sends each development task to a new factory-dev thread."

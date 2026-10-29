@@ -87,7 +87,6 @@ Select by contribution to the outcome and name them in the brief. Have workers c
 | `autonomous-development` | Large development tasks need its supervisor/worker workflow; the worker owns that workflow and runs its roles as its own sub-agents. |
 | `autonomous-development-lite` | Small or bounded development tasks fit one worker thread. One development workflow per assignment. |
 | `git-track` | Non-development change tasks need commits and a PR; do not duplicate Git rules a development workflow already supplies. |
-| `coordinate` | Other agents work in the same repository or the user asks for coordination; pass known assignments, branches, and worktrees. |
 | `bw-browser` | Live browser work needs BetterWright's persistent authenticated profile. |
 | `playwright-browser` | Browser testing, screenshots, or console/network inspection; honor headless default. |
 | `herdr` | Herdr host only: the worker needs Herdr control beyond the tab recipe in its brief. |

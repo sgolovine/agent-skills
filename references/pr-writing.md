@@ -1,6 +1,6 @@
-# Factory PR writing
+# PR writing
 
-Apply to PR titles, PR bodies, review comments, and replies.
+Shared style for agent-written PR titles, bodies, review comments, and replies. Apply to PR titles, PR bodies, review comments, and replies.
 
 ## Sentences
 
@@ -48,15 +48,19 @@ Keep the body true to the current head. When a later commit changes behavior, up
 - Impact: The concrete consequence for users, data, security, operations, or compatibility.
 - Recommendation: The smallest fix or test that addresses it.
 
-<!-- factory-review -->
+<!-- <skill>-review -->
 ```
+
+Include the marker only when the skill tracks its own comments (see `github.md`).
 
 ## Resolution reply
 
 ```markdown
-Factory resolution: <fixed|rejected|already-fixed|disputed|unable-to-verify>
+<Prefix> resolution: <fixed|rejected|already-fixed|disputed|unable-to-verify>
 
 <What changed and the commits, or why no change is right.>
 Evidence: <code path, test, or observed output>
 Checks: <commands and results>
 ```
+
+`<Prefix>` names the skill or agent posting the reply.

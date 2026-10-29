@@ -87,7 +87,7 @@ Assigned development worker:
    - Create multiple focused commits as implementation progresses, committing each coherent milestone before moving to the next, such as a schema or API change, the core implementation, tests, or documentation. Do not accumulate the entire implementation for one final commit or defer splitting it into commits until the end.
    - Use a single commit only for very minor work that forms one small, coherent change, such as a typo fix or a narrowly scoped one-line correction. A task being atomic does not by itself justify one commit. Choose meaningful boundaries; do not create empty or artificial commits merely to increase the count.
    - Before each checkpoint, run the fastest relevant targeted check and inspect the staged diff. Keep each commit focused and leave the branch in a usable state when practical.
-   - Follow the repository's documented or recent commit convention. If none is clear, use Conventional Commits 1.0.0 (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`, and similar).
+   - Write commit messages as described in [commits.md](shared/commits.md).
    - Push immediately after the first commit with `git push -u origin <branch>`, then push again after every later commit. Do not wait until the end of a multi-milestone task to publish all progress.
    - Do not use meaningless checkpoint messages such as `WIP`, and do not amend, squash, rebase, or force-push already published checkpoints unless the user explicitly asks.
 
@@ -114,7 +114,7 @@ Development workers review `git status --short` and the relevant diff before eac
 
 Screenshots are a required deliverable for **every task**, separate from validation. Capture and include them even when a validation agent is skipped or validation checks cannot be performed. Screenshots do not substitute for checks. At scores **1–2**, the supervisor captures them in the same thread; at score **3**, the development agent owns them; at scores **4–10**, the validation agent owns them. If an optional validator is used at score 3, screenshot ownership stays with development.
 
-Capture actual task-relevant output, including for non-UI changes: rendered documentation, CLI behavior, or API responses as appropriate. For UI changes, capture comparable before-and-after states. Inspect the images for readability, correct revision and state, and absence of secrets. When validation is performed, combine screenshots with its evidence and report while retaining screenshot completion as a separate requirement. Preserve the images and capture context for PR upload; if checks are blocked, still capture any available screenshot evidence and report the check limitations separately.
+Follow [the shared screenshots reference](shared/screenshots.md) for scenario planning, runtime setup, capture, upload, and cleanup. This skill requires screenshots for every task, so ignore that reference's skip rule for internal changes. Capture actual task-relevant output, including for non-UI changes: rendered documentation, CLI behavior, or API responses as appropriate. For UI changes, capture comparable before-and-after states. Inspect the images for readability, correct revision and state, and absence of secrets. When validation is performed, combine screenshots with its evidence and report while retaining screenshot completion as a separate requirement. Preserve the images and capture context for PR upload; if checks are blocked, still capture any available screenshot evidence and report the check limitations separately.
 
 ## Finalize And Open PR
 
@@ -128,8 +128,8 @@ After validation sign-off, the supervisor finalizes scores 1–2 in the same thr
    - implementation notes that matter for review,
    - validation commands and outcomes,
    - known gaps, skipped checks, or follow-up work,
-   - a link to the uploaded screenshot comment for every task, added after the upload below.
-5. Upload the screenshot evidence to the PR for every task. For UI changes, use [the GitHub PR screenshots skill](../github-pr-screenshots/SKILL.md) with the newly created PR URL, keeping capture responsibility with the screenshot owner above. For non-UI work, upload the task-relevant images directly without invoking that UI-only skill. Include the screenshots alongside validation results when available, or as standalone evidence when validation was not performed. Verify that the posted comment displays every image and link it from the PR body. Local screenshot paths or other artifact links do not satisfy the upload requirement. If capture or upload is blocked, preserve any captured images and report their paths and the exact blocker; do not claim the task is complete.
+   - a `## Screenshots` section for every task, filled with the uploaded images after the upload below.
+5. Upload the screenshot evidence into the PR body's `## Screenshots` section for every task, following §4 of [the shared screenshots reference](shared/screenshots.md) with the newly created PR, keeping capture responsibility with the screenshot owner above. Include the screenshots alongside validation results when available, or as standalone evidence when validation was not performed. Verify that the PR description renders every image. Local screenshot paths or other artifact links do not satisfy the upload requirement. If capture or upload is blocked, follow §5 of that reference: preserve any captured images, write the exact blocker in `## Screenshots`, report it, and do not claim the task is complete.
 
 Do not merge the PR, mark it ready, request reviewers, or modify remote repository settings unless the user explicitly asks.
 

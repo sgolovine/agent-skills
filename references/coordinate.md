@@ -1,8 +1,3 @@
----
-name: coordinate
-description: Coordinate Codex CLI work with other agents active in the same repository, agree on ownership and shared changes, and commit and push coherent checkpoints throughout the task. Use when multiple agents are working concurrently in a repository or the user requests coordinated development.
----
-
 # Coordinate
 
 Other agents are working in the same repository. Coordinate with them throughout the task and publish progress through commits and pushes as you work.

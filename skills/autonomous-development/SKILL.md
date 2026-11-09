@@ -123,12 +123,30 @@ After validation sign-off, the supervisor finalizes scores 1–2 in the same thr
 1. Confirm task changes are committed and the branch still matches the signed-off commit. If final changes are needed, return through development, fresh validation, and supervisor sign-off before opening the PR. Stage only files that belong to the task and follow the checkpoint rules.
 2. Confirm every commit has been pushed and the local task branch is synchronized with its upstream.
 3. Open a draft pull request by default with `gh pr create --draft --base <parent>`, where `<parent>` is the parent branch established earlier. Use a ready-for-review PR only when the user explicitly requests it. If `gh` is unavailable or unauthenticated, leave the branch pushed and report the compare URL as the blocker instead of retrying other tooling.
-4. Write the PR body with:
-   - summary of the user-facing or developer-facing change,
-   - implementation notes that matter for review,
-   - validation commands and outcomes,
-   - known gaps, skipped checks, or follow-up work,
-   - a `## Screenshots` section for every task, filled with the uploaded images after the upload below.
+4. Write the PR body so a reviewer sees a short opener first and expands the agent-written detail on demand:
+   - Keep visible: the shortest summary of the user-facing or developer-facing change that gets a reader up to speed; known gaps, skipped checks, failed checks, or follow-up work; companion PRs and landing order; and a `## Screenshots` section for every task, filled with the uploaded images after the upload below.
+   - Collapse in one `<details>` block at the end: implementation notes that matter for review, and validation commands and outcomes. Name the model, plus the effort level when known, in `<summary>`. Keep a blank line after `</summary>` and before `</details>` so GitHub renders the Markdown inside.
+
+   ```markdown
+   <shortest useful summary>
+
+   ## Known gaps
+
+   <omit when there are none>
+
+   ## Screenshots
+
+   <uploaded images>
+
+   <details>
+   <summary>Claude Opus 5.5 Medium</summary>
+
+   ## Implementation notes
+
+   ## Validation
+
+   </details>
+   ```
 5. Upload the screenshot evidence into the PR body's `## Screenshots` section for every task, following §4 of [the shared screenshots reference](shared/screenshots.md) with the newly created PR, keeping capture responsibility with the screenshot owner above. Include the screenshots alongside validation results when available, or as standalone evidence when validation was not performed. Verify that the PR description renders every image. Local screenshot paths or other artifact links do not satisfy the upload requirement. If capture or upload is blocked, follow §5 of that reference: preserve any captured images, write the exact blocker in `## Screenshots`, report it, and do not claim the task is complete.
 
 Do not merge the PR, mark it ready, request reviewers, or modify remote repository settings unless the user explicitly asks.

@@ -1,4 +1,4 @@
 interface:
   display_name: "Autonomous Development"
-  short_description: "Supervise workers from research through a validated PR"
-  default_prompt: "Use $autonomous-development to rightsize this feature, supervise fresh workers through research, planning, development in an isolated worktree, and validation, publish coherent checkpoints, and open a draft PR after supervisor sign-off."
+  short_description: "Score, staff, and carry a change through a validated draft PR"
+  default_prompt: "Use $autonomous-development to score this change, staff fresh workers or run solo as the score requires, implement it in an isolated worktree with pushed checkpoints, validate it, and open a draft PR after supervisor sign-off."

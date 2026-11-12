@@ -17,7 +17,7 @@ The user does not approve the plan unless they asked to review plans at the outs
 
 ## Score And Staff The Task
 
-Before any repository work, score the request from 1 to 10 by scope, uncertainty, risk, and dependencies. State the score, a one-line rationale, the tier, and the agents you will spawn. Rescore when findings change the scope; the new tier applies to stages not yet started.
+Before any repository work, score the request from 1 to 10 by scope, uncertainty, risk, and dependencies. State the score, a one-line rationale, the tier, and the agents you will spawn. Rescore when findings change the scope; the new tier applies to stages not yet started. If it assigns remaining work to a worker that has already returned, spawn a fresh worker for that work.
 
 | Tier | Score | Fits | Research and plan | Development | Validation and screenshots |
 | --- | --- | --- | --- | --- | --- |
@@ -38,7 +38,7 @@ For the Delegated, Validated, and Researched tiers:
 - A worker returns once. A planning worker returns the plan and stops; a fresh development worker implements the plan after the supervisor accepts it.
 - Brief each worker with the request, its role and scope, repository instructions, the control checkout, worktree path, branch, remote, parent ref, start SHA, the accepted outputs of earlier stages, acceptance criteria, and the required output.
 - Require each worker to return its findings or changes, evidence, commit IDs, blockers, and inputs for the next stage. Reconcile the outputs of parallel workers before accepting a stage.
-- Workers never use `gh` or the provider's web UI.
+- Workers never write to the git provider: no `gh` commands, PR edits, comments, or uploads. Read-only views of rendered pages for screenshots are allowed.
 - Follow the worktree contract's single-writer rule. Run workers in parallel only when at most one of them writes to the worktree, including caches and generated files.
 
 ### Single-Agent Mode
@@ -55,10 +55,10 @@ The supervisor performs every stage in its own thread. No one else checks the wo
 The supervisor runs the baseline at every tier.
 
 1. Confirm a git checkout with `git rev-parse --show-toplevel`. If there is none, stop and report that this workflow requires one. Inspect `git status --short --branch`, `git remote -v`, and `git worktree list`. Do not overwrite, revert, stash, or commit pre-existing work.
-2. Resolve the remote: the one the user names, else the remote of the current branch's upstream, else `origin`, else the only remote. Run `git fetch --prune <remote>`.
+2. Resolve the remote: the one the user names, else the remote of the current branch's upstream, else `origin`, else the only remote. Run `git fetch --prune <remote>`. When that remote is a fork, also fetch the upstream remote; resolve the parent and open the PR against upstream.
 3. Resolve the parent branch with git:
    - If the user names a parent, verify that it exists on the remote or locally.
-   - Otherwise use the remote's default branch: `git symbolic-ref --short refs/remotes/<remote>/HEAD`, or `git ls-remote --symref <remote> HEAD` when the local ref is unset.
+   - Otherwise use the remote's default branch: `git symbolic-ref --short refs/remotes/<remote>/HEAD`, or `git ls-remote --symref <remote> HEAD` when the local ref is unset. Strip the `<remote>/` or `refs/heads/` prefix so `<parent>` is a bare branch name.
    - If neither gives an answer, stop and ask. Never use the current feature branch as the parent by assumption.
 4. Use `<remote>/<parent>` as the start point when it exists. Otherwise use the local parent and note that push and PR steps may be blocked.
 5. Apply [the shared linked worktree contract](shared/worktrees.md) with the original checkout as the control checkout, the start point above, a unique branch `<harness>/<short-kebab-summary>` unless the user names one, and a unique path such as `../<repo>-worktrees/<short-kebab-summary>`. Never develop on the parent branch. Do all later repository work in the worktree.
@@ -68,11 +68,11 @@ The supervisor runs the baseline at every tier.
 
 Follow [the shared coordination reference](shared/coordinate.md). The supervisor owns coordination with other agents; workers report overlaps they find. Coordination never authorizes merging PRs or changing another agent's branch or worktree.
 
-Before final validation, fetch the parent again. Merge required landed changes into the task branch without rewriting published commits, then rerun the affected checks. Record companion PRs, dependencies, and the agreed landing order for the PR body.
+Before final validation, the development role fetches the parent again, merges required landed changes into the task branch without rewriting published commits, pushes, and reruns the affected checks. If the parent advances after the development worker returns, the supervisor assigns the merge to a fresh development worker. Record companion PRs, dependencies, and the agreed landing order for the PR body.
 
 ## Plan
 
-The plan owner presents a concise plan in the conversation:
+The plan owner prepares a concise plan:
 
 - the requested outcome, explicit requirements, and assumptions,
 - the files, modules, APIs, and commands discovered in the repository,
@@ -81,13 +81,13 @@ The plan owner presents a concise plan in the conversation:
 - screenshot scenarios per §1 of [the shared screenshots reference](shared/screenshots.md), or the one-line reason none apply,
 - risks, migrations, or compatibility notes when relevant.
 
-Keep plan files out of commits. The supervisor reviews the plan against the request, closes material gaps, and accepts it. Ask the user only about blocking ambiguity.
+Keep plan files out of commits. The supervisor reviews the plan against the request, closes material gaps, accepts it, and presents the accepted plan in the conversation. Ask the user only about blocking ambiguity.
 
 ## Implement
 
 The development role:
 
-1. Before the first edit, runs the plan's checks at the start SHA and records failures that already exist.
+1. Before the first edit of the task, runs the plan's checks at the start SHA and records failures that already exist. Correction workers reuse that record.
 2. Reads the code and tests around each touch point, follows repository patterns, and keeps changes in scope: no opportunistic refactors, formatting sweeps, or dependency upgrades.
 3. Adds or updates tests near the changed behavior, or explains why tests are not practical. Updates docs, migrations, or configuration only when the behavior requires it.
 4. Commits and pushes as it works:
@@ -106,7 +106,7 @@ The validation report names the validated commit and gives, for each acceptance 
 
 The supervisor reviews the report against the request and plan:
 
-- For an implementation issue, spawn a fresh development worker with the plan, the findings, the worktree, and the current commit. After it pushes, revalidate per the tier: a fresh validation worker at Validated and Researched, or the correction worker's own evidence at Delegated. Resolve a material plan gap with a fresh planning assignment before more development.
+- For an implementation issue, spawn a fresh development worker with the plan, the findings, the worktree, and the current commit. After it pushes, revalidate per the tier: a fresh validation worker at Validated and Researched, or the correction worker's own evidence at Delegated. When a correction or merge changes visible output, the screenshot owner for the tier recaptures the affected scenarios. Resolve a material plan gap with a fresh planning assignment before more development.
 - Stop after three correction rounds. Open the draft PR with the unmet criteria under `## Known gaps`, report the blocker, and do not claim completion.
 - Record sign-off explicitly only when the evidence shows that the request and plan are fulfilled. Any later commit invalidates the sign-off and needs fresh validation.
 
@@ -118,8 +118,8 @@ The screenshot owner from the tier table follows §1–§3 of [the shared screen
 
 The supervisor:
 
-1. Confirms that the worktree is clean, every commit is pushed, and the remote head is the signed-off commit.
-2. Reuses an open PR for the branch (`gh pr list --head <branch>`). Otherwise runs `gh pr create --draft --base <parent> --head <branch>`, prefixing the head with `<fork-owner>:` when the remote is a fork. Opens a ready PR only when the user asks. If `gh` is unavailable or unauthenticated, reports the compare URL as the blocker.
+1. Confirms that the worktree is clean, every commit is pushed, and the remote head is the signed-off commit, or the last validated commit after the correction cap.
+2. Reuses an open PR for the branch (`gh pr list --head <branch>`). Otherwise runs `gh pr create --draft --base <parent> --head <branch>`, adding `--repo <upstream-owner/repo>` and prefixing the head with `<fork-owner>:` when the remote is a fork. Opens a ready PR only when the user asks. If `gh` is unavailable or unauthenticated, reports the compare URL as the blocker.
 3. Writes the title and body per [the shared PR writing reference](shared/pr-writing.md). Includes companion PRs, baseline failures, and single-agent mode when used.
 4. Uploads the screenshots into `## Screenshots` per §4 of the screenshots reference and verifies that every image renders. For skipped screenshots, writes the one-line reason. For a blocked capture or upload, follows §5.
 
@@ -127,4 +127,4 @@ Do not merge the PR, mark it ready, request reviewers, or change repository sett
 
 ## Completion
 
-Finish only after the PR contains the signed-off commit and the screenshots or the reason they were skipped. Report the tier and mode, branch, worktree path, start SHA, pushed commits, PR URL, validation and sign-off, skipped checks, and unresolved risks. Leave the worktree in place unless the user asks to remove it. If pushing, opening the PR, or uploading screenshots is blocked, keep the branch reviewable and report the exact blocker.
+Claim completion only when the PR contains the signed-off commit and the uploaded screenshots or the reason they were skipped. A correction cap or a blocked capture or upload ends the run without a completion claim. Report the tier and mode, branch, worktree path, start SHA, pushed commits, PR URL, validation and sign-off, skipped checks, and unresolved risks. Leave the worktree in place unless the user asks to remove it. If pushing, opening the PR, or uploading screenshots is blocked, keep the branch reviewable and report the exact blocker.

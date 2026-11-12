@@ -120,7 +120,30 @@ The supervisor:
 
 1. Confirms that the worktree is clean, every commit is pushed, and the remote head is the signed-off commit, or the last validated commit after the correction cap.
 2. Reuses an open PR for the branch (`gh pr list --head <branch>`). Otherwise runs `gh pr create --draft --base <parent> --head <branch>`, adding `--repo <upstream-owner/repo>` and prefixing the head with `<fork-owner>:` when the remote is a fork. Opens a ready PR only when the user asks. If `gh` is unavailable or unauthenticated, reports the compare URL as the blocker.
-3. Writes the title and body per [the shared PR writing reference](shared/pr-writing.md). Includes companion PRs, baseline failures, and single-agent mode when used.
+3. Writes the title and the body's sentences per [the shared PR writing reference](shared/pr-writing.md), but lays out the body so a reviewer sees a short opener first and expands the agent-written detail on demand:
+   - Keep visible: the shortest summary of the change that gets a reader up to speed; known gaps, failed or skipped checks, and follow-up work; companion PRs and landing order; and `## Screenshots`.
+   - Collapse in one `<details>` block at the end: implementation notes that matter for review, validation commands and outcomes, baseline failures, and single-agent mode when used. Name the model, plus the effort level when known, in `<summary>`. Keep a blank line after `</summary>` and before `</details>` so GitHub renders the Markdown inside.
+
+   ```markdown
+   <shortest useful summary>
+
+   ## Known gaps
+
+   <omit when there are none>
+
+   ## Screenshots
+
+   <uploaded images, or the skip reason or blocker>
+
+   <details>
+   <summary>Claude Opus 5.5 Medium</summary>
+
+   ## Implementation notes
+
+   ## Validation
+
+   </details>
+   ```
 4. Uploads the screenshots into `## Screenshots` per §4 of the screenshots reference and verifies that every image renders. For skipped screenshots, writes the one-line reason. For a blocked capture or upload, follows §5.
 
 Do not merge the PR, mark it ready, request reviewers, or change repository settings unless the user asks.
